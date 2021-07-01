@@ -18,11 +18,14 @@ library(rvest) # Scraping data from websites
 library(lubridate) # fast and user friendly parsing of date-time data,
 
 
-#ui.R
+#Importing the data, readVcf from VariantAnnotation package
+
 vcf <- readVcf("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/SRR.gavin_secondpass.vcf", "GRCh38")
 vcf_1 <- as.data.frame(VariantAnnotation::fixed(vcf))
 vcf_2 <- as.data.frame(VariantAnnotation::info(vcf))
 vcf_3 <- as.data.frame(rowRanges(vcf))
+
+
 # duplicate info here
 vcf_master <- cbind(vcf_3, vcf_1, vcf_2)
 # stage an empty DF which we will populate in the 'for' loop.
@@ -32,6 +35,7 @@ collect_ann <- data.frame(Allele=as.character(),
                           IMPACT=as.character(),
                           Symbol=as.character(),
                           Gene=as.character())
+
 # loop over every row in df
 for(i in 1:nrow(vcf_master)){
     # grab the ann column
@@ -47,6 +51,7 @@ for(i in 1:nrow(vcf_master)){
     # populate the collect ann df
     collect_ann <- rbind(collect_ann, ann)
 }
+
 # append to master df
 vcf_master <- cbind(vcf_master, collect_ann)
 # Then collect
@@ -64,11 +69,11 @@ for(i in 1:nrow(vcf_master)){
 }
 vcf_master <- cbind(vcf_master, collect_rlv)
 
+
 #Substitute for '|' and 'c' with a blank '' instead
 vcf_master$Allele <- gsub('^c\\(|\\)$', '', vcf_master$Allele)
 #Substitute numbers for '' instead
 vcf_master$Allele <- gsub("[^A-Za-z0-9]", "", vcf_master$Allele)
-
 vcf_master <- vcf_master %>% rownames_to_column(var = "ID_")
 
 # Make the ID 'NA' if it starts with a number, (as opposed to starting with "rs.....")
@@ -85,10 +90,21 @@ vcf_master <- transform(vcf_master, CADD_SCALED = as.numeric(CADD_SCALED))
 vcf_master$ID_ <- reorder(vcf_master$ID_, vcf_master$CADD_SCALED)
 
 #Creating a gene dataframe for the genes table, selecting relevant columns
-genes <- vcf_master %>% select(c(Symbol, Gene, seqnames, start, REF, Allele, Consequence, IMPACT))
+genes <- vcf_master %>% select(c(Symbol, 
+                                 Gene, 
+                                 seqnames, 
+                                 start, 
+                                 REF, 
+                                 Allele, 
+                                 Consequence, 
+                                 IMPACT))
 
 #Renaming the columns to more intuitive names
-genes <- dplyr::rename(genes, Chr = seqnames, From = REF, To = Allele, HGNC = Symbol)
+genes <- dplyr::rename(genes, 
+                       Chr = seqnames, 
+                       From = REF, 
+                       To = Allele, 
+                       HGNC = Symbol)
 
 #Substitute any "_" for blank ""
 genes$Consequence <- gsub("_", " ", genes$Consequence)
@@ -99,7 +115,6 @@ genes$Consequence <- gsub("&", " and ", genes$Consequence)
 vcf_master$CADD_SCALED <- round(as.numeric(vcf_master$CADD_SCALED), digits=0)
 vcf_master$Consequence <- gsub("_", " ", vcf_master$Consequence)
 vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
-
 
 #Quality score dataframe
 df<- as.data.frame(vcf_master$QUAL)
@@ -118,7 +133,11 @@ df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
 
 
 
-#Beginning of Shiny UI
+
+### Beginning of Shiny App
+
+# Define UI for application
+
 
 ui = dashboardPage(controlbar = NULL, footer = NULL,
     skin = "red",
@@ -190,7 +209,9 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                     includeCSS("www/styles.css")
                 ),
                 
-                HTML("<button type='button' class='btn' data-toggle='collapse' style='float:left' data-target='#app_info'><span class='glyphicon glyphicon-collapse-down'></span> More Information</button>"),
+                HTML("<button type='button' class='btn' data-toggle='collapse' style='float:left' 
+                     data-target='#app_info'><span class='glyphicon 
+                     glyphicon-collapse-down'></span> More Information</button>"),
                 
                 br(),
                 br(),
@@ -389,7 +410,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                   )))))
 
                        
-
+# Define Server for application
 
 server <- function(input, output, session) {
     
