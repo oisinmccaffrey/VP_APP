@@ -1,36 +1,32 @@
 library(shiny)
 library(ggplot2)
-library(vcfR)
-library(dplyr)
+library(vcfR) # For manipulating VCF data
+library(dplyr) # Manipulating datasets
 library(tidyr)
-library(stringr)
-library(VariantAnnotation)
+library(stringr) # Used for removing pipe separators from VCF files "|" 
+library(VariantAnnotation) # exploration and annotation of genetic variants
 library(tibble)
-library(shinyWidgets)
+library(shinyWidgets) # custom input controls and user interface components for 'Shiny' applications
 library(shinydashboard) # For shiny dashboard layout
-library(shinydashboardPlus) # For shiny dashboard layout
+library(shinydashboardPlus) # Shiny dashboard with 'AdminLTE2' component
 library(DT) # to generate interactive datatables
 library(plotly) # to generate interactive plots
-library(shinycssloaders) # for loading spinner while app is loading
-library(randomForest) # to generate RSF classifier models
-library(gprofiler2) # for Functional Enrichment analysis of drive genes
 library(shinyalert) # for error alert
 library(shinyjs) # for error message
-library(shinyscreenshot)
-library(rvest)
-library(lubridate)
+library(shinyscreenshot) # Capture screenshots in 'Shiny' applications - downloaded as a PNG image
+library(rvest) # Scraping data from websites
+library(lubridate) # fast and user friendly parsing of date-time data,
 
 
 #ui.R
-library(VariantAnnotation)
 vcf <- readVcf("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/SRR.gavin_secondpass.vcf", "GRCh38")
 vcf_1 <- as.data.frame(VariantAnnotation::fixed(vcf))
 vcf_2 <- as.data.frame(VariantAnnotation::info(vcf))
 vcf_3 <- as.data.frame(rowRanges(vcf))
-# duplicate info here, will let you decide whats important
+# duplicate info here
 vcf_master <- cbind(vcf_3, vcf_1, vcf_2)
-# stage an empty DF which we will populate in the for loop.
-# If you want to extract another col, be sure to add it here
+# stage an empty DF which we will populate in the 'for' loop.
+# If extracting another col, be sure to add it here
 collect_ann <- data.frame(Allele=as.character(),
                           Consequence=as.character(),
                           IMPACT=as.character(),
@@ -53,7 +49,7 @@ for(i in 1:nrow(vcf_master)){
 }
 # append to master df
 vcf_master <- cbind(vcf_master, collect_ann)
-# I do not know the official terms for these columns, figure that out
+# Then collect
 collect_rlv <- data.frame(Status=as.character(),
                           METIN=as.character(),
                           Prediction=as.character(),
@@ -67,18 +63,39 @@ for(i in 1:nrow(vcf_master)){
     collect_rlv <- rbind(collect_rlv, rlv)
 }
 vcf_master <- cbind(vcf_master, collect_rlv)
+
+#Substitute for '|' and 'c' with a blank '' instead
 vcf_master$Allele <- gsub('^c\\(|\\)$', '', vcf_master$Allele)
+#Substitute numbers for '' instead
 vcf_master$Allele <- gsub("[^A-Za-z0-9]", "", vcf_master$Allele)
+
 vcf_master <- vcf_master %>% rownames_to_column(var = "ID_")
+
+# Make the ID 'NA' if it starts with a number, (as opposed to starting with "rs.....")
 is.na(vcf_master$ID_) <- startsWith(vcf_master$ID_, "1") | startsWith(vcf_master$ID_, "2") | startsWith(vcf_master$ID_, "3") | startsWith(vcf_master$ID_, "4") | startsWith(vcf_master$ID_, "5") | startsWith(vcf_master$ID_, "6") | startsWith(vcf_master$ID_, "7") | startsWith(vcf_master$ID_, "8") | startsWith(vcf_master$ID_, "9") | startsWith(vcf_master$ID_, "10") | startsWith(vcf_master$ID_, "11") | startsWith(vcf_master$ID_, "12") | startsWith(vcf_master$ID_, "13") | startsWith(vcf_master$ID_, "14") | startsWith(vcf_master$ID_, "15") | startsWith(vcf_master$ID_, "16") | startsWith(vcf_master$ID_, "17") | startsWith(vcf_master$ID_, "18") | startsWith(vcf_master$ID_, "19") | startsWith(vcf_master$ID_, "20") | startsWith(vcf_master$ID_, "21") | startsWith(vcf_master$ID_, "22") | startsWith(vcf_master$ID_, "X")
+
+#Remove all the NAs from the ID_ column.. leaving just those with valid accession number
 vcf_master <- vcf_master %>% drop_na(ID_)
 vcf_master <- vcf_master %>% drop_na(CADD_SCALED)
+
+# transform CADD_SCALED column to be numeric data
 vcf_master <- transform(vcf_master, CADD_SCALED = as.numeric(CADD_SCALED))
+
+#Reorder the ID_ column to be rank in terms of CADD_SCALED score
 vcf_master$ID_ <- reorder(vcf_master$ID_, vcf_master$CADD_SCALED)
 
+#Creating a gene dataframe for the genes table, selecting relevant columns
 genes <- vcf_master %>% select(c(Symbol, Gene, seqnames, start, REF, Allele, Consequence, IMPACT))
+
+#Renaming the columns to more intuitive names
 genes <- dplyr::rename(genes, Chr = seqnames, From = REF, To = Allele, HGNC = Symbol)
 
+#Substitute any "_" for blank ""
+genes$Consequence <- gsub("_", " ", genes$Consequence)
+#Substitute "&" for " and "
+genes$Consequence <- gsub("&", " and ", genes$Consequence)
+
+#Rounding the CADD values to nearest whole number
 vcf_master$CADD_SCALED <- round(as.numeric(vcf_master$CADD_SCALED), digits=0)
 vcf_master$Consequence <- gsub("_", " ", vcf_master$Consequence)
 vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
@@ -100,9 +117,13 @@ df_MQ <- rename(df_MQ, MQ = `vcf_master$MQ`)
 df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
 
 
+
+#Beginning of Shiny UI
+
 ui = dashboardPage(controlbar = NULL, footer = NULL,
     skin = "red",
     dashboardHeader(title = "Variant Prioritisaion"),
+    
     # Create side-bar menu with all tab options: 
     dashboardSidebar(
 
@@ -138,6 +159,12 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                 menuSubItem("Mapping Quality", tabName = "MQ")),
             
             menuItem(
+              text = "Raw Data", 
+              tabName = "rawdata",
+              icon = icon("code"),
+              startExpanded = TRUE),
+            
+            menuItem(
                 text = "About", 
                 tabName = "About",
                 icon = icon("paper-plane"),
@@ -148,6 +175,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
     
     dashboardBody(
       
+      #css the .content-wrapper to change background colour
       tags$head(tags$style(HTML('/* body */
                                 .content-wrapper, .right-side {
                                 background-color: #FFFFFF;
@@ -162,17 +190,26 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                     includeCSS("www/styles.css")
                 ),
                 
+                HTML("<button type='button' class='btn' data-toggle='collapse' style='float:left' data-target='#app_info'><span class='glyphicon glyphicon-collapse-down'></span> More Information</button>"),
+                
+                br(),
+                br(),
+                
                 div(id = "app_info", class = "collapsible", 
-                    p("This application provides a means of visualising sequencing data post variant calling. Here we are using data taken from 1000 Genomes on GRCh38, specifically (Population:
-                    British in England and Scotland, European Ancestry) samples
-                    from various donors. See:"),             
-                    tags$a(href = "https://dcc.icgc.org/releases/release_19/Projects/PACA-AU", "https://dcc.icgc.org/releases/release_19/Projects/PACA-AU"),
+                    p("This application provides a means of visualising sequencing 
+                    data post variant calling. Here we are using data taken 
+                    from 1000 Genomes on GRCh38, specifically (Population:
+                    British in England and Scotland, European Ancestry) See:"),             
+                    tags$a(href = "https://www.internationalgenome.org/", 
+                           "https://www.internationalgenome.org/"),
                     p(""),
-                    p("Raw whole exome sequencing (WES) data sourced from IGSR: The International Genome Sample Resource - "),
-                    tags$a(href = "https://www.internationalgenome.org/data-portal/sample", "https://www.internationalgenome.org/data-portal/sample")  
+                    p("Raw whole exome sequencing (WES) data sourced from IGSR: 
+                      The International Genome Sample Resource - "),
+                    tags$a(href = "https://www.internationalgenome.org/data-portal/sample", 
+                           "https://www.internationalgenome.org/data-portal/sample")  
                 ),
                 
-                HTML("<button type='button' class='btn' data-toggle='collapse' style='float:left' data-target='#app_info'><span class='glyphicon glyphicon-collapse-down'></span> More Information</button>"),
+                
                 
                 br(),  br(),
                 
@@ -226,31 +263,40 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                     closable = TRUE,
                     width = 12,
                     status = "warning",
-                    solidHeader = TRUE,
                     collapsible = TRUE,
+                    solidHeader = TRUE,
                     type = NULL,
                     src = "shorturl.at/avDHP",
                     color = "aqua-active",
                     useShinyalert(),
+                    # Search Bar for user to enter Gene Symbol for patient-level data
                     sidebarSearchForm(textId = "searchvcf", buttonId = "searchButton",
-                                      label = "Enter Gene Symbol..."), # Search Bar for user to enter Gene Symbol for patient-level data
+                                      label = "Enter Gene Symbol..."), 
                     br(),
-                    boxProfileItem("Gene:", textOutput("gene_symbol")),
+                    boxProfileItem("Gene:", span(textOutput("gene_symbol"), style='color:#149414')),
                     br(),
-                    boxProfileItem("Chromosome:", textOutput("gene_chromosome")),
+                    boxProfileItem("Chromosome:", span(textOutput("gene_chromosome"), style='color:#149414')),
                     br(),
-                    boxProfileItem("Reference base:", textOutput("gene_ref_variant")),
+                    boxProfileItem("Reference base:", span(textOutput("gene_ref_variant"), style='color:#149414')),
                     br(),
-                    boxProfileItem("Alternate base:", textOutput("gene_alt_variant")),
+                    boxProfileItem("Alternate base:", span(textOutput("gene_alt_variant"), style='color:#149414')),
                     br(),
-                    boxProfileItem("Consequence:", textOutput("gene_consequence")),
+                    boxProfileItem("Consequence:", span(textOutput("gene_consequence"), style='color:#ff2400')),
                     br(),
-                    boxProfileItem("Impact:", textOutput("gene_impact")),
+                    boxProfileItem("Impact:", span(textOutput("gene_impact"), style='color:#ff2400')),
                     br(),
-                    boxProfileItem("CADD:", textOutput("gene_cadd")),
+                    boxProfileItem("CADD:", span(textOutput("gene_cadd"), style='color:#ff2400')),
                     br(),
-                    actionButton("go", "PNG", style='padding:4px; font-size:80%'),
+                    actionButton("go", "PNG", style='padding:4px; font-size:100%'),
                     hr())),
+        
+        tabItem("rawdata",
+                fluidRow(
+                  tabPanel("Raw Data",
+                           fluidPage(
+                             dataTableOutput("plot1")
+                           )
+                  ))),
 
 
             tabItem("About",
@@ -281,7 +327,13 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                  ),
                                  
                                  div(id = "quality_info", class = "collapsible", 
-                                     p("Quality scores are blah blah"),
+                                     p("Quality scores are blah blah..",
+                                       br(),
+                                       p("Numerical example:"),
+                                      br(),
+                                      p("QUAL=20: 1 % chance that there is no variant at the site"),
+                                      br(),
+                                      p("QUAL=50: 1 in 1e5 chance that there is no variant at the site"),
                                      tags$a(href = "https://www.internationalgenome.org/data-portal/sample", "https://www.internationalgenome.org/data-portal/sample")  
                                  ),
                                  
@@ -291,7 +343,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                  
                                ),
                                  plotOutput("qual_hist_plot")
-                               ))),
+                               )))),
                       
 
             tabItem("DP",
@@ -364,37 +416,37 @@ server <- function(input, output, session) {
     })
     
     output$gene_chromosome <- renderText({
-        # display chromosome for gene with corresponding to gene symbol query in search bar
+        # display chromosome for gene with corresponding gene symbol query in search bar
         vcf_gene <- vcf_genes()
         vcf_gene$seqnames
     })
     
     output$gene_ref_variant <- renderText({
-        # display chromosome for gene with corresponding to gene symbol query in search bar
+        # display reference variant for gene with corresponding gene symbol query in search bar
         vcf_gene <- vcf_genes()
         vcf_gene$REF
     })
     
     output$gene_alt_variant <- renderText({
-        # display chromosome for gene with corresponding to gene symbol query in search bar
+        # display alternative variant for gene with corresponding gene symbol query in search bar
         vcf_gene <- vcf_genes()
         vcf_gene$Allele
     })
     
     output$gene_consequence <- renderText({
-        # display chromosome for gene with corresponding to gene symbol query in search bar
+        # display the consequence of the variant for gene with corresponding gene symbol query in search bar
         vcf_gene <- vcf_genes()
         vcf_gene$Consequence
     })
     
     output$gene_impact <- renderText({
-        # display chromosome for gene with corresponding to gene symbol query in search bar
+        # display the impact for gene with corresponding gene symbol query in search bar
         vcf_gene <- vcf_genes()
         vcf_gene$IMPACT
     })
     
     output$gene_cadd <- renderText({
-      # display chromosome for gene with corresponding to gene symbol query in search bar
+      # display CADD score for gene with corresponding gene symbol query in search bar
       vcf_gene <- vcf_genes()
       vcf_gene$CADD_Relevance
     })
@@ -405,7 +457,8 @@ server <- function(input, output, session) {
     
     observeEvent(input$dimension,{
         output$plot2 <- renderPlotly({
-            cadd_id_plot <- ggplot(data = vcf_master, aes(x=ID_, y = as.factor(CADD_SCALED), fill = Consequence)) + 
+            cadd_id_plot <- ggplot(data = vcf_master, 
+                 aes(x=ID_, y = as.factor(CADD_SCALED), fill = Consequence)) + 
                 geom_point(size = 2) +
                 ggtitle("CADD Score vs. SNP Accession") +
                 scale_y_discrete(limits = c(0, 50,
@@ -437,7 +490,8 @@ server <- function(input, output, session) {
               theme(axis.title.x = element_text(angle = 0))
             
                     
-            ggplotly(cadd_id_plot, width = (0.90*as.numeric(input$dimension[1])), height = as.numeric(input$dimension[2]))
+            ggplotly(cadd_id_plot, width = (0.90*as.numeric(input$dimension[1])), 
+                     height = as.numeric(input$dimension[2]))
             
         })
         
@@ -450,7 +504,7 @@ server <- function(input, output, session) {
               scale_x_continuous(limits = c(0, 2000), 
                                  expand = c(0, 0),
                                  breaks = seq(0, 2000, by = 250),
-                                 name = "MQ") +
+                                 name = "QUAL") +
               ggtitle("Quality (QUAL)") +
               theme_minimal() +
               theme(plot.title = element_text(hjust = 0.5, face = "bold")) +
