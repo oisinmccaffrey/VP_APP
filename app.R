@@ -209,25 +209,52 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                     includeCSS("www/styles.css")
                 ),
                 
+                
+                
                 HTML("<button type='button' class='btn' data-toggle='collapse' style='float:left' 
                      data-target='#app_info'><span class='glyphicon 
                      glyphicon-collapse-down'></span> More Information</button>"),
+                
+                
                 
                 br(),
                 br(),
                 
                 div(id = "app_info", class = "collapsible", 
+                    
+                tags$h2(strong("Welcome to Variant Prioritisation")),
+                
+                br(),
+                
+                tags$h5(strong("Objective")), 
+                "The primary objective of this clinical variant prioritisation web application 
+                is to improve upon the limited functionality of GAVIN and other popular variant 
+                calling/prioritisation tools. The application provides a tiered system ranking variants 
+                in terms of their pathogenicity and role in known diseases, as well as providing additional 
+                functionality such as summary reports of metrics used in variant classification 
+                (e.g., quality, depth and allele frequency). 
+                The application provides a clinician with the ability to filter by gene panels, 
+                and query affected genes via the OMIM API, returning gene-phenotype information supported by literature. 
+                As there is a veritable need for improvements to current variant prioritisation and visualisation methods, 
+                this project will provide substantial positive progress to the movement 
+                for improved sequence variant annotation and prioritisation from NGS projects.",
+                tags$br(),tags$br(),
+                
+                tags$h5(strong("Data")),
+                
                     p("This application provides a means of visualising sequencing 
                     data post variant calling. Here we are using data taken 
                     from 1000 Genomes on GRCh38, specifically (Population:
                     British in England and Scotland, European Ancestry) See:"),             
                     tags$a(href = "https://www.internationalgenome.org/", 
-                           "https://www.internationalgenome.org/"),
+                           "IGSR"),
                     p(""),
                     p("Raw whole exome sequencing (WES) data sourced from IGSR: 
                       The International Genome Sample Resource - "),
                     tags$a(href = "https://www.internationalgenome.org/data-portal/sample", 
-                           "https://www.internationalgenome.org/data-portal/sample")  
+                           "IGSR Data"),
+                    tags$br(),tags$br(),
+                    tags$img(src = "images/nuig_logo.png", width = "150px", height = "75px")
                 ),
                 
                 
@@ -482,10 +509,11 @@ server <- function(input, output, session) {
                  aes(x=ID_, y = as.factor(CADD_SCALED), fill = Consequence)) + 
                 geom_point(size = 2) +
                 ggtitle("CADD Score vs. SNP Accession") +
-                scale_y_discrete(limits = c(0, 50,
-                                   breaks = c(10,  20,  30, 40, 50),
-                                   labels = c("10", "20", "30", "40","50"),
-                                   name = "CADD SCORE") +
+                scale_y_discrete(limits = c(15, 50,
+                                          breaks = c(15,  20,  30, 40, 50),
+                                          labels = c("15", "20", "30", "40","50"),
+                                          expand=c(0,0),
+                                          name = "CADD SCORE") +
                 scale_x_discrete("Variant ID") +
                 theme_minimal() +
                 theme(
@@ -501,7 +529,7 @@ server <- function(input, output, session) {
                     panel.background=element_blank(),
                     panel.ontop = TRUE, 
                     legend.position= c(0.75, 0.92), legend.direction="horizontal",
-                    legend.text = element_text(size = 6), # legend text  was a little large
+                    legend.text = element_text(size = 6), 
                     legend.key.size = unit(0.6, "lines"),
                     legend.title = element_text(size =10)))
             
