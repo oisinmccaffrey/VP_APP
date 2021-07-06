@@ -1,5 +1,5 @@
 library(shiny)
-library(plotly)
+library(plotly) # interactive ggplots.. 
 library(grid)
 library(ggplot2)
 library(vcfR) # For manipulating VCF data
@@ -384,18 +384,36 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                               includeCSS("www/styles.css")
                                             ),
                                             
-                                            div(id = "quality_info", class = "collapsible", 
-                                                p("Quality scores are blah blah..",
+                                            HTML("<button type='button' class='btn' data-toggle='collapse' 
+                                                 style='float:left' data-target='#quality_info'
+                                                 ><span class='glyphicon glyphicon-collapse-down'
+                                                 ></span> More Information</button>"),
+                                            
+                                            br(),
+                                            br(),
+                                            
+                                            
+                                            div(id = "quality_info", class = "collapsible",
+                                            
+                                            tags$h5(strong("Quality (QUAL)")),
+                                             
+                                                p("Quality scores or ‘QUAL’ refers to the Phred-scaled probability 
+                                                  that a polymorphism actually exists at the specific site 
+                                                  (i.e. Ref allele to Alternative allele).
+                                                  The data is presented as a histogram of all variants in the file, 
+                                                  with the quality (QUAL) of each variant plotted  against  
+                                                  the  relative  frequency  of  that  score.  Thehigher  the  score,  
+                                                  the  higher  the  probability  that  thevariant call is correct 
+                                                  at that position in the genome.",
                                                   br(),
-                                                  p("Numerical example:"),
-                                                  br(),
-                                                  p("QUAL=20: 1 % chance that there is no variant at the site"),
-                                                  br(),
-                                                  p("QUAL=50: 1 in 1e5 chance that there is no variant at the site"),
-                                                  tags$a(href = "https://www.internationalgenome.org/data-portal/sample", "https://www.internationalgenome.org/data-portal/sample")  
+                                                  tags$h5(strong("Numerical Example:")), 
+          
+                                                  p("QUAL = 20, there is a 1 % chance that there is no variant at the site"),
+                                                  p("QUAL = 50, there is a 1 in 1e5 (0.00001%) chance that there is no variant at the site"),
+                                                  tags$a(href = "https://gatk.broadinstitute.org/hc/en-us", "GATK")  
                                                 ),
                                                 
-                                                HTML("<button type='button' class='btn' data-toggle='collapse' style='float:left' data-target='#quality_info'><span class='glyphicon glyphicon-collapse-down'></span> More Information</button>"),
+                                                
                                                 
                                                 br(),  br(),
                                                 
@@ -413,12 +431,30 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                               includeCSS("www/styles.css")
                                             ),
                                             
-                                            div(id = "dp_info", class = "collapsible", 
-                                                p("Quality scores are blah blah"),
-                                                tags$a(href = "https://www.internationalgenome.org/data-portal/sample", "https://www.internationalgenome.org/data-portal/sample")  
-                                            ),
+                                            HTML("<button type='button' class='btn' data-toggle='collapse' 
+                                                 style='float:left' data-target='#dp_info'
+                                                 ><span class='glyphicon glyphicon-collapse-down'
+                                                 ></span> More Information</button>"),
                                             
-                                            HTML("<button type='button' class='btn' data-toggle='collapse' style='float:left' data-target='#dp_info'><span class='glyphicon glyphicon-collapse-down'></span> More Information</button>"),
+                                            br(),
+                                            br(),
+                                            
+                                            
+                                            div(id = "dp_info", class = "collapsible",
+                                                
+                                                tags$h5(strong("Read Depth (DP)")),
+                                                
+                                                p("The read depth or coverage refers to the amount 
+                                                  of sequence data available around the site of the variant.
+                                                  The read depth can be somewhat considered as 
+                                                  reflective of the power one has to make a call on the 
+                                                  genotype of the sample at this position. 
+                                                  This is distinct from the QUAL calculations -- 
+                                                  which filter out reads of poor mapping quality."),
+                                                  br(),
+                                                  
+                                                  tags$a(href = "https://gatk.broadinstitute.org/hc/en-us", "GATK")  
+                                                ),
                                             
                                             br(),  br(),
                                             
@@ -434,12 +470,26 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                             tags$head(
                                               includeCSS("www/styles.css")
                                             ),
-                                            div(id = "MQ_info", class = "collapsible", 
-                                                p("Quality scores are blah blah"),
-                                                tags$a(href = "https://www.internationalgenome.org/data-portal/sample", "https://www.internationalgenome.org/data-portal/sample")  
+                                            
+                                            HTML("<button type='button' class='btn' data-toggle='collapse' 
+                                                 style='float:left' data-target='#mq_info'
+                                                 ><span class='glyphicon glyphicon-collapse-down'
+                                                 ></span> More Information</button>"),
+                                            
+                                            br(),
+                                            br(),
+                                          
+                                            div(id = "mq_info", class = "collapsible",
+                                                
+                                                tags$h5(strong("Mapping Quality (MQ)")),
+                                                
+                                                p("Median mapping quality score calculated taking 
+                                                  into account each read that matches 
+                                                  the allele from the variant. "),
+                                                br(),
+                                                
+                                                tags$a(href = "https://gatk.broadinstitute.org/hc/en-us", "GATK")  
                                             ),
-                                            HTML("<button type='button' class='btn' data-toggle='collapse' style='float:left' data-target='#MQ_info'><span class='glyphicon glyphicon-collapse-down'></span> More Information</button>"),
-                                            br(),  br(),
                                           ),
                                           plotOutput("MQ_hist_plot")
                                  )
