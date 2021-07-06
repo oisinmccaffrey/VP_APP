@@ -1,10 +1,14 @@
 library(shiny)
 library(plotly) # interactive ggplots.. 
 library(grid)
+library(rmarkdown)
+library(magrittr)
 library(ggplot2)
 library(vcfR) # For manipulating VCF data
 library(dplyr) # Manipulating datasets
 library(tidyr)
+library(htmlwidgets) # to use saveWidget function
+library(shinycssloaders) # for loading spinner while app is loading
 library(stringr) # Used for removing pipe separators from VCF files "|" 
 library(VariantAnnotation) # exploration and annotation of genetic variants
 library(tibble)
@@ -16,6 +20,7 @@ library(plotly) # to generate interactive plots
 library(shinyalert) # for error alert
 library(shinyjs) # for error message
 library(shinyscreenshot) # Capture screenshots in 'Shiny' applications - downloaded as a PNG image
+library(webshot)
 library(rvest) # Scraping data from websites
 library(lubridate) # fast and user friendly parsing of date-time data,
 
@@ -106,7 +111,8 @@ genes <- vcf_master %>% select(c(Symbol,
                                  start, 
                                  REF, 
                                  Allele, 
-                                 Consequence, 
+                                 Consequence,
+                                 EXAC_AF,
                                  IMPACT))
 
 #Renaming the columns to more intuitive names
@@ -114,7 +120,8 @@ genes <- dplyr::rename(genes,
                        Chr = seqnames, 
                        From = REF, 
                        To = Allele, 
-                       HGNC = Symbol)
+                       HGNC = Symbol,
+                       MAF = EXAC_AF)
 
 #Substitute any "_" for blank ""
 genes$Consequence <- gsub("_", " ", genes$Consequence)
@@ -130,6 +137,9 @@ vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
 df<- as.data.frame(vcf_master$QUAL)
 df <- rename(df, QUAL = `vcf_master$QUAL`)
 df <- transform(df, QUAL = as.numeric(QUAL))
+
+df <- df %>% drop_na(QUAL)
+
 
 #Read depth dataframe
 df_DP<- as.data.frame(vcf_master$DP)
@@ -291,7 +301,9 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                         Shiny.onInputChange("dimension", dimension);
                         });
                          ')), 
-                                            plotlyOutput("plot2", width = "auto")
+                                            plotlyOutput("plot2", width = "auto") %>% withSpinner(color = "red")
+                                            
+
                                           )
                                  ))),
                        
@@ -311,7 +323,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                    ),
                                    tabPanel("Genes",
                                             status = "success",
-                                            dataTableOutput("genomic_plot"))))),
+                                            dataTableOutput("genomic_plot") %>% withSpinner(color = "red"))))),
                        
                        
                        tabItem(
@@ -339,20 +351,22 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                            br(),
                            boxProfileItem("Alternate base:", span(textOutput("gene_alt_variant"), style='color:#149414')),
                            br(),
-                           boxProfileItem("Consequence:", span(textOutput("gene_consequence"), style='color:#ff2400')),
+                           boxProfileItem("Consequence:", span(textOutput("gene_consequence"), style='color:#800080')),
+                           br(),
+                           boxProfileItem("Minor Allele Frequency: 10^X:", span(textOutput("gene_maf"), style='color:#0000FF')),
                            br(),
                            boxProfileItem("Impact:", span(textOutput("gene_impact"), style='color:#ff2400')),
                            br(),
                            boxProfileItem("CADD:", span(textOutput("gene_cadd"), style='color:#ff2400')),
                            br(),
-                           actionButton("go", "PNG", style='padding:4px; font-size:100%'),
+                           br(),
                            hr())),
-                       
+                                                 
                        tabItem("rawdata",
                                fluidRow(
                                  tabPanel("Raw Data",
                                           fluidPage(
-                                            dataTableOutput("plot1")
+                                            dataTableOutput("plot1") %>% withSpinner(color = "red")
                                           )
                                  ))),
                        
@@ -418,7 +432,8 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                                 br(),  br(),
                                                 
                                             ),
-                                            plotOutput("qual_hist_plot")
+                                            plotOutput("qual_hist_plot") %>% withSpinner(color = "red")
+
                                           )))),
                        
                        
@@ -459,7 +474,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                             br(),  br(),
                                             
                                           ),
-                                          plotOutput("dp_hist_plot")
+                                          plotOutput("dp_hist_plot") %>% withSpinner(color = "red")
                                  ))),
                        
                        
@@ -491,7 +506,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                                 tags$a(href = "https://gatk.broadinstitute.org/hc/en-us", "GATK")  
                                             ),
                                           ),
-                                          plotOutput("MQ_hist_plot")
+                                          plotOutput("MQ_hist_plot") %>% withSpinner(color = "red")
                                  )
                                  
                                )))))
@@ -545,6 +560,12 @@ server <- function(input, output, session) {
     # display the consequence of the variant for gene with corresponding gene symbol query in search bar
     vcf_gene <- vcf_genes()
     vcf_gene$Consequence
+  })
+  
+  output$gene_maf <- renderText({
+    # display the consequence of the variant for gene with corresponding gene symbol query in search bar
+    vcf_gene <- vcf_genes()
+    vcf_gene$EXAC_AF
   })
   
   output$gene_impact <- renderText({
@@ -604,6 +625,7 @@ server <- function(input, output, session) {
       
       ggplotly(cadd_id_plot, tooltip = c("x", "y", "ID", "fill"), width = (0.85*as.numeric(input$dimension[1])), 
                height = as.numeric(input$dimension[2]))
+
       
     })
     
@@ -659,9 +681,28 @@ server <- function(input, output, session) {
       
     })   
     
-    observeEvent(input$go, {
-      screenshot()
-      
+    #For downloading HTML report, not working atm
+    output$report <- downloadHandler(
+      # For PDF output, change this to "report.pdf"
+      filename = "report.html",
+      content = function(file) {
+        # Copy the report file to a temporary directory before processing it, in
+        # case we don't have write permissions to the current working dir (which
+        # can happen when deployed).
+        tempReport <- file.path(tempdir(), "report.Rmd")
+        file.copy("report.Rmd", tempReport, overwrite = TRUE)
+        
+        # Set up parameters to pass to Rmd document
+        params <- list(qual_hist_plot = input$qual_hist_plot)
+        
+        # Knit the document, passing in the `params` list, and eval it in a
+        # child of the global environment (this isolates the code in the document
+        # from the code in this app).
+        rmarkdown::render(tempReport, output_file = file,
+                          params = params,
+                          envir = new.env(parent = globalenv()))
+        
+
     })
     
   })
