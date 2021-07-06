@@ -3,6 +3,8 @@ library(plotly) # interactive ggplots..
 library(grid)
 library(rmarkdown)
 library(magrittr)
+library(Cairo)
+library(grDevices)
 library(ggplot2)
 library(vcfR) # For manipulating VCF data
 library(dplyr) # Manipulating datasets
@@ -83,8 +85,31 @@ vcf_master$Allele <- gsub('^c\\(|\\)$', '', vcf_master$Allele)
 vcf_master$Allele <- gsub("[^A-Za-z0-9]", "", vcf_master$Allele)
 vcf_master <- vcf_master %>% rownames_to_column(var = "ID_")
 
-# Make the ID 'NA' if it starts with a number, (as opposed to starting with "rs.....")
-is.na(vcf_master$ID_) <- startsWith(vcf_master$ID_, "1") | startsWith(vcf_master$ID_, "2") | startsWith(vcf_master$ID_, "3") | startsWith(vcf_master$ID_, "4") | startsWith(vcf_master$ID_, "5") | startsWith(vcf_master$ID_, "6") | startsWith(vcf_master$ID_, "7") | startsWith(vcf_master$ID_, "8") | startsWith(vcf_master$ID_, "9") | startsWith(vcf_master$ID_, "10") | startsWith(vcf_master$ID_, "11") | startsWith(vcf_master$ID_, "12") | startsWith(vcf_master$ID_, "13") | startsWith(vcf_master$ID_, "14") | startsWith(vcf_master$ID_, "15") | startsWith(vcf_master$ID_, "16") | startsWith(vcf_master$ID_, "17") | startsWith(vcf_master$ID_, "18") | startsWith(vcf_master$ID_, "19") | startsWith(vcf_master$ID_, "20") | startsWith(vcf_master$ID_, "21") | startsWith(vcf_master$ID_, "22") | startsWith(vcf_master$ID_, "X")
+# Make the ID 'NA' if it starts with a number, (we want the variants starting with "rs.....")
+is.na(vcf_master$ID_) <- 
+  startsWith(vcf_master$ID_, "1") |
+  startsWith(vcf_master$ID_, "2") |
+  startsWith(vcf_master$ID_, "3") |
+  startsWith(vcf_master$ID_, "4") |
+  startsWith(vcf_master$ID_, "5") |
+  startsWith(vcf_master$ID_, "6") |
+  startsWith(vcf_master$ID_, "7") |
+  startsWith(vcf_master$ID_, "8") |
+  startsWith(vcf_master$ID_, "9") |
+  startsWith(vcf_master$ID_, "10")|
+  startsWith(vcf_master$ID_, "11")|
+  startsWith(vcf_master$ID_, "12")|
+  startsWith(vcf_master$ID_, "13")|
+  startsWith(vcf_master$ID_, "14")|
+  startsWith(vcf_master$ID_, "15")|
+  startsWith(vcf_master$ID_, "16")|
+  startsWith(vcf_master$ID_, "17")|
+  startsWith(vcf_master$ID_, "18")|
+  startsWith(vcf_master$ID_, "19")|
+  startsWith(vcf_master$ID_, "20")|
+  startsWith(vcf_master$ID_, "21")|
+  startsWith(vcf_master$ID_, "22")|
+  startsWith(vcf_master$ID_, "X")
 
 #Remove all the NAs from the ID_ column.. leaving just those with valid accession number
 vcf_master <- vcf_master %>% drop_na(ID_)
@@ -586,6 +611,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$dimension,{
     output$plot2 <- renderPlotly({
+      
       cadd_id_plot <- ggplot(data = vcf_master, 
                              aes(x=EXAC_AF, y = as.factor(CADD_SCALED), fill = Consequence, ID = ID_)) + 
         geom_point(size = 2) +
@@ -595,7 +621,7 @@ server <- function(input, output, session) {
                                     labels = c("15", "20", "30", "40","50"),
                                     expand=c(0,0),
                                     name = "CADD SCORE") +
-                           scale_x_discrete("Variant ID") +
+                           scale_x_discrete("Minor Allele Frequency: 10^X:") +
                            theme_minimal() +
                            theme(plot.margin=unit(c(1,1,1.5,1.2),"cm")) +
                            theme(
@@ -608,6 +634,7 @@ server <- function(input, output, session) {
                              panel.grid.major.x =element_line(),
                              panel.grid.minor.x = element_blank(),
                              panel.grid.major.y = element_blank(),
+                             plot.background = element_rect(fill = "transparent",colour = NA),
                              panel.background=element_blank(),
                              panel.ontop = TRUE, 
                              legend.position= c(0.75, 0.92), legend.direction="horizontal",
@@ -617,14 +644,15 @@ server <- function(input, output, session) {
       
       cadd_id_plot <- cadd_id_plot + ylab("CADD Score") + 
         theme(axis.title.y = element_text(angle = 0)) +
+        theme_bw() +
         xlab("Minor Allele Frequency: 10^X:") + 
         theme(plot.title = element_text(hjust = 0.5, face = "bold"))
         theme(axis.title.x = element_text(angle = 0))
       
       
       
-      ggplotly(cadd_id_plot, tooltip = c("x", "y", "ID", "fill"), width = (0.85*as.numeric(input$dimension[1])), 
-               height = as.numeric(input$dimension[2]))
+      ggplotly(cadd_id_plot, tooltip = c("x", "y", "ID", "fill"), width = (0.825*as.numeric(input$dimension[1])), 
+               height = (0.90*as.numeric(input$dimension[2])))
 
       
     })
