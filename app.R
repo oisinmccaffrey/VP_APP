@@ -56,7 +56,12 @@ for(i in 1:nrow(vcf_master)){
   # we want the first 5 cols in this case
   ann <- ann[,1:5]
   # rename to match the collect_ann df
-  colnames(ann) <- c("Allele", "Consequence", "IMPACT", "Symbol", "Gene")
+  colnames(ann) <- c("Allele", 
+                     "Consequence", 
+                     "IMPACT", 
+                     "Symbol", 
+                     "Gene")
+  
   # populate the collect ann df
   collect_ann <- rbind(collect_ann, ann)
 }
@@ -68,20 +73,26 @@ collect_rlv <- data.frame(Status=as.character(),
                           METIN=as.character(),
                           Prediction=as.character(),
                           CADD_Relevance=as.character())
+
 for(i in 1:nrow(vcf_master)){
   rlv <- vcf_master$RLV[i]
   rlv <- str_split(rlv, "\\|")
   rlv <- as.data.frame(t(unlist(rlv)))
   rlv <- rlv[,c(11,13,15,17)]
-  colnames(rlv) <- c("Status", "METIN", "Prediction", "CADD_Relevance")
+  colnames(rlv) <- c("Status", 
+                     "METIN", 
+                     "Prediction", 
+                     "CADD_Relevance")
+  
   collect_rlv <- rbind(collect_rlv, rlv)
 }
 vcf_master <- cbind(vcf_master, collect_rlv)
 
-
 #Substitute for '|' and 'c' with a blank '' instead
 vcf_master$Allele <- gsub('^c\\(|\\)$', '', vcf_master$Allele)
+
 #Substitute numbers for '' instead
+
 vcf_master$Allele <- gsub("[^A-Za-z0-9]", "", vcf_master$Allele)
 vcf_master <- vcf_master %>% rownames_to_column(var = "ID_")
 
@@ -124,7 +135,6 @@ vcf_master <- transform(vcf_master, EXAC_AF = as.numeric(EXAC_AF))
 vcf_master$ID_ <- reorder(vcf_master$ID_, vcf_master$CADD_SCALED)
 
 
-
 #Log scale ExAC AF
 vcf_master$EXAC_AF <- log(vcf_master$EXAC_AF)
 
@@ -154,17 +164,17 @@ genes$Consequence <- gsub("_", " ", genes$Consequence)
 genes$Consequence <- gsub("&", " and ", genes$Consequence)
 
 #Rounding the CADD values to nearest whole number
+
 vcf_master$CADD_SCALED <- round(as.numeric(vcf_master$CADD_SCALED), digits=0)
 vcf_master$Consequence <- gsub("_", " ", vcf_master$Consequence)
 vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
 
 #Quality score dataframe
+
 df<- as.data.frame(vcf_master$QUAL)
 df <- rename(df, QUAL = `vcf_master$QUAL`)
 df <- transform(df, QUAL = as.numeric(QUAL))
-
 df <- df %>% drop_na(QUAL)
-
 
 #Read depth dataframe
 df_DP<- as.data.frame(vcf_master$DP)
@@ -175,7 +185,6 @@ df_DP <- transform(df_DP, DP = as.numeric(DP))
 df_MQ<- as.data.frame(vcf_master$MQ)
 df_MQ <- rename(df_MQ, MQ = `vcf_master$MQ`)
 df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
-
 
 
 
@@ -256,7 +265,8 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                
                                
                                
-                               HTML("<button type='button' class='btn' data-toggle='collapse' style='float:left' 
+                               HTML("<button type='button' class='btn' 
+                               data-toggle='collapse' style='float:left' 
                      data-target='#app_info'><span class='glyphicon 
                      glyphicon-collapse-down'></span> More Information</button>"),
                                
@@ -368,21 +378,37 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                            sidebarSearchForm(textId = "searchvcf", buttonId = "searchButton",
                                              label = "Enter Gene Symbol..."), 
                            br(),
-                           boxProfileItem("Gene:", span(textOutput("gene_symbol"), style='color:#149414')),
+                           boxProfileItem("Gene:", 
+                                          span(textOutput("gene_symbol"), 
+                                               style='color:#149414')),
                            br(),
-                           boxProfileItem("Chromosome:", span(textOutput("gene_chromosome"), style='color:#149414')),
+                           boxProfileItem("Chromosome:", 
+                                          span(textOutput("gene_chromosome"), 
+                                               style='color:#149414')),
                            br(),
-                           boxProfileItem("Reference base:", span(textOutput("gene_ref_variant"), style='color:#149414')),
+                           boxProfileItem("Reference base:", 
+                                          span(textOutput("gene_ref_variant"), 
+                                               style='color:#149414')),
                            br(),
-                           boxProfileItem("Alternate base:", span(textOutput("gene_alt_variant"), style='color:#149414')),
+                           boxProfileItem("Alternate base:", 
+                                          span(textOutput("gene_alt_variant"), 
+                                               style='color:#149414')),
                            br(),
-                           boxProfileItem("Consequence:", span(textOutput("gene_consequence"), style='color:#800080')),
+                           boxProfileItem("Consequence:", 
+                                          span(textOutput("gene_consequence"), 
+                                               style='color:#800080')),
                            br(),
-                           boxProfileItem("Minor Allele Frequency: 10^X:", span(textOutput("gene_maf"), style='color:#0000FF')),
+                           boxProfileItem("Minor Allele Frequency: 10^X:", 
+                                          span(textOutput("gene_maf"), 
+                                               style='color:#0000FF')),
                            br(),
-                           boxProfileItem("Impact:", span(textOutput("gene_impact"), style='color:#ff2400')),
+                           boxProfileItem("Impact:", 
+                                          span(textOutput("gene_impact"), 
+                                               style='color:#ff2400')),
                            br(),
-                           boxProfileItem("CADD:", span(textOutput("gene_cadd"), style='color:#ff2400')),
+                           boxProfileItem("CADD:", 
+                                          span(textOutput("gene_cadd"), 
+                                               style='color:#ff2400')),
                            br(),
                            br(),
                            hr())),
@@ -539,6 +565,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
 
 # Define Server for application
 
+
 server <- function(input, output, session) {
   
   observeEvent(input$searchButton, {
@@ -621,6 +648,7 @@ server <- function(input, output, session) {
                                     labels = c("15", "20", "30", "40","50"),
                                     expand=c(0,0),
                                     name = "CADD SCORE") +
+                           
                            scale_x_discrete("Minor Allele Frequency: 10^X:") +
                            theme_minimal() +
                            theme(plot.margin=unit(c(1,1,1.5,1.2),"cm")) +
