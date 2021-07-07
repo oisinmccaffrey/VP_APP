@@ -467,7 +467,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                                   (i.e. Ref allele to Alternative allele).
                                                   The data is presented as a histogram of all variants in the file, 
                                                   with the quality (QUAL) of each variant plotted  against  
-                                                  the  relative  frequency  of  that  score.  Thehigher  the  score,  
+                                                  the  relative  frequency  of  that  score.  The higher  the  score,  
                                                   the  higher  the  probability  that  thevariant call is correct 
                                                   at that position in the genome.",
                                                   br(),
@@ -688,7 +688,7 @@ server <- function(input, output, session) {
     
     output$qual_hist_plot <- renderPlot({
       ggplot(df, aes(QUAL)) +
-        geom_histogram(bins = 30, color = "black", fill = "#40E0D0") +
+        geom_histogram(bins = 30, color = "black", fill = "#00FFFF") +
         geom_vline(aes(xintercept = mean(QUAL)), 
                    linetype = "dashed", size = 0.6) +
         scale_x_continuous(limits = c(0, 2000), 
