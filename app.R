@@ -126,10 +126,14 @@ is.na(vcf_master$ID_) <-
 vcf_master <- vcf_master %>% drop_na(ID_)
 vcf_master <- vcf_master %>% drop_na(CADD_SCALED)
 vcf_master <- vcf_master %>% drop_na(EXAC_AF)
+vcf_master <- vcf_master %>% drop_na(seqnames)
 
 # transform CADD_SCALED column to be numeric data
 vcf_master <- transform(vcf_master, CADD_SCALED = as.numeric(CADD_SCALED))
 vcf_master <- transform(vcf_master, EXAC_AF = as.numeric(EXAC_AF))
+
+vcf_master <- transform(vcf_master, ID_ = as.character(ID_))
+vcf_master <- transform(vcf_master, seqnames = as.numeric(seqnames))
 
 #Reorder the ID_ column to be rank in terms of CADD_SCALED score
 vcf_master$ID_ <- reorder(vcf_master$ID_, vcf_master$CADD_SCALED)
@@ -186,7 +190,11 @@ df_MQ<- as.data.frame(vcf_master$MQ)
 df_MQ <- rename(df_MQ, MQ = `vcf_master$MQ`)
 df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
 
-
+ID_plot_dataframe <- vcf_master
+ID_plot_dataframe <- as.data.frame(ID_plot_dataframe)
+ID_plot_dataframe <- transform(ID_plot_dataframe, ID_ = as.character(ID_))
+ID_plot_dataframe <- transform(ID_plot_dataframe, seqnames = as.numeric(seqnames))
+ID_plot_dataframe
 
 ### Beginning of Shiny App
 
@@ -212,7 +220,8 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                          tabName = "pathogenicity",
                          icon = icon("medkit"),
                          startExpanded = TRUE,
-                         menuSubItem("CADD", tabName = "CADD")),
+                         menuSubItem("CADD", tabName = "CADD"),
+                         menuSubItem("Genomic Location", tabName = "Genomic_Location")),
                        
                        menuItem(
                          text = "Genomic Data", 
@@ -339,6 +348,29 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                             plotlyOutput("plot2", width = "auto") %>% withSpinner(color = "red")
                                             
 
+                                          )
+                                 ))),
+                       
+                       tabItem("Genomic_Location",
+                               fluidRow(
+                                 tabPanel("Genomic Location Plot",
+                                          fluidPage(
+                                            tags$head(tags$script('
+                        var dimension = [0, 0];
+                        $(document).on("shiny:connected", function(e) {
+                        dimension[0] = window.innerWidth;
+                        dimension[1] = window.innerHeight;
+                        Shiny.onInputChange("dimension", dimension);
+                        });
+                        $(window).resize(function(e) {
+                        dimension[0] = window.innerWidth;
+                        dimension[1] = window.innerHeight;
+                        Shiny.onInputChange("dimension", dimension);
+                        });
+                         ')), 
+                                            plotOutput("plot3", width = "auto") %>% withSpinner(color = "red")
+                                            
+                                            
                                           )
                                  ))),
                        
@@ -683,8 +715,47 @@ server <- function(input, output, session) {
                height = (0.90*as.numeric(input$dimension[2])))
 
       
-    })
+      })
+
     
+      output$plot3 <- renderPlot({
+        
+        ggplot(vcf_master, aes(x=ID_, y = seqnames, fill=Status)) + 
+          coord_flip() +
+          geom_point() +
+          theme(
+            axis.line.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.line.x = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.text.x = element_text(),
+            axis.title.x = element_blank(),
+            panel.background = element_blank(),
+            panel.grid = element_blank(),
+            plot.margin = unit(c(0.5, 0.5, 2, 0.5), "cm"),
+            plot.title = element_text(size=8, face="bold")) +
+          
+          scale_x_discrete("Accession ID") +
+          scale_y_discrete("Genomic Location") +
+          theme(
+            legend.text = element_text(size = 8),
+            legend.position = c(0.55, -0.2), # move to the bottom
+            legend.title = element_blank(),
+            legend.key.size = unit(0.9, "line"),
+            legend.spacing.x = unit(0.2, 'cm'),
+            legend.background = element_rect(
+              fill = "white",
+              size = 0.5,
+              colour = "white"
+            )
+          ) +
+          
+          theme(axis.title.x = element_text(angle = 0)) +
+          theme(axis.text.y = element_blank()) +
+          theme(axis.ticks.y = element_blank())
+
+      })
+      
     
     output$qual_hist_plot <- renderPlot({
       ggplot(df, aes(QUAL)) +
@@ -757,7 +828,7 @@ server <- function(input, output, session) {
         rmarkdown::render(tempReport, output_file = file,
                           params = params,
                           envir = new.env(parent = globalenv()))
-        
+      
 
     })
     

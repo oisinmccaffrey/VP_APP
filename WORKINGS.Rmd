@@ -107,8 +107,15 @@ vcf_master <- vcf_master %>% tibble::rownames_to_column(var = "ID_")
 is.na(vcf_master$ID_) <- startsWith(vcf_master$ID_, "1") | startsWith(vcf_master$ID_, "2") | startsWith(vcf_master$ID_, "3") | startsWith(vcf_master$ID_, "4") | startsWith(vcf_master$ID_, "5") | startsWith(vcf_master$ID_, "6") | startsWith(vcf_master$ID_, "7") | startsWith(vcf_master$ID_, "8") | startsWith(vcf_master$ID_, "9") | startsWith(vcf_master$ID_, "10") | startsWith(vcf_master$ID_, "11") | startsWith(vcf_master$ID_, "12") | startsWith(vcf_master$ID_, "13") | startsWith(vcf_master$ID_, "14") | startsWith(vcf_master$ID_, "15") | startsWith(vcf_master$ID_, "16") | startsWith(vcf_master$ID_, "17") | startsWith(vcf_master$ID_, "18") | startsWith(vcf_master$ID_, "19") | startsWith(vcf_master$ID_, "20") | startsWith(vcf_master$ID_, "21") | startsWith(vcf_master$ID_, "22") | startsWith(vcf_master$ID_, "X")
 ```
 
+
 ```{r}
-vcf_master$RLV[1]
+head(rowRanges(vcf), 3)
+```
+
+
+```{r}
+DS <-geno(vcf)$DS 
+dim(DS)
 ```
 
 
@@ -387,6 +394,73 @@ QD_hist_plot <- ggplot(data=df_QD, aes(QD)) +
         theme(axis.title.y = element_text(angle = 0, vjust = 0.5))
       
       QD_hist_plot
+```
+```{r}
+vcf_master <- vcf_master %>% drop_na(ID_)
+```
+
+
+```{r}
+library("SNPlocs.Hsapiens.dbSNP144.GRCh38")
+snps <- SNPlocs.Hsapiens.dbSNP144.GRCh38
+snpsById(snps, vcf_master$ID_, ifnotfound="drop")
+```
+
+
+```{r}
+vcf_master$seqnames
+```
+
+```{r}
+vcf_master <- vcf_master %>% drop_na(seqnames)
+```
+
+
+```{r}
+ID_plot_dataframe <- vcf_master
+ID_plot_dataframe <- as.data.frame(ID_plot_dataframe)
+ID_plot_dataframe <- transform(ID_plot_dataframe, ID_ = as.character(ID_))
+ID_plot_dataframe <- transform(ID_plot_dataframe, seqnames = as.numeric(seqnames))
+ID_plot_dataframe
+```
+
+
+```{r}
+ID_location_plot <- ggplot(vcf_master, 
+                             aes(x=ID_, y = seqnames, fill=Status)) + 
+  coord_flip() +
+        geom_point() +
+  theme(
+         axis.line.y = element_blank(),
+         axis.ticks.y = element_blank(),
+         axis.line.x = element_blank(),
+         axis.ticks.x = element_blank(),
+         axis.text.x = element_text(),
+         axis.title.x = element_blank(),
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        plot.margin = unit(c(0.5, 0.5, 2, 0.5), "cm"),
+        plot.title = element_text(size=8, face="bold")) +
+  scale_x_discrete("Accession ID") +
+  scale_y_discrete("Genomic Location") +
+  theme(
+    legend.text = element_text(size = 8),
+    legend.position = c(0.55, -0.2), # move to the bottom
+    legend.title = element_blank(),
+    legend.key.size = unit(0.9, "line"),
+    legend.spacing.x = unit(0.2, 'cm'),
+    legend.background = element_rect(
+      fill = "white",
+      size = 0.5,
+      colour = "white"
+    )
+    ) 
+
+ID_location_plot <- ID_location_plot + theme(axis.title.x = element_text(angle = 0)) 
+ID_location_plot <- ID_location_plot + theme(axis.text.y = element_blank())
+ID_location_plot <- ID_location_plot + theme(axis.ticks.y = element_blank())
+
+ggplotly(ID_location_plot)
 ```
 
 
