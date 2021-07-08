@@ -219,6 +219,10 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                    dashboardSidebar(
                      
                      br(),
+                     
+                     #SidebarMenu to create Home, 
+                     #Pathogenicity, Genomic Data, VCF METRICS, About, and Raw Data Tabs
+                     
                      sidebarMenu(
                        menuItem(
                          text = "Home",
@@ -268,6 +272,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                    dashboardBody(
                      
                      #css the .content-wrapper to change background colour
+                     #This Makes the pain page white as oppose to standard grey
                      tags$head(tags$style(HTML('/* body */
                                 .content-wrapper, .right-side {
                                 background-color: #FFFFFF;
@@ -283,14 +288,15 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                ),
                                
                                
+                               #Create Interactive 'More Information' button 
+                               #Can be opened or closed
                                
                                HTML("<button type='button' class='btn' 
                                data-toggle='collapse' style='float:left' 
                      data-target='#app_info'><span class='glyphicon 
                      glyphicon-collapse-down'></span> More Information</button>"),
                                
-                               
-                               
+
                                br(),
                                br(),
                                
@@ -343,6 +349,10 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                  tabPanel("CADD Plot",
                                           fluidPage(
                                             tags$head(tags$script('
+                                            
+                                            #Use Javascript to detect the browser window size 
+                                            #(initial size and any resize if you make window bigger)
+                                            
                         var dimension = [0, 0];
                         $(document).on("shiny:connected", function(e) {
                         dimension[0] = window.innerWidth;
@@ -355,6 +365,9 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                         Shiny.onInputChange("dimension", dimension);
                         });
                          ')), 
+                                            
+                                            #WithSpinner to create red spinning logo while plot loads
+                                            
                                             plotlyOutput("plot2", width = "auto") %>% withSpinner(color = "red")
                                             
 
@@ -366,6 +379,10 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                  tabPanel("Status",
                                           fluidPage(
                                             tags$head(tags$script('
+                                            
+                                            #Use Javascript to detect the browser window size 
+                                            #(initial size and any resize if you make window bigger)
+                                            
                         var dimension = [0, 0];
                         $(document).on("shiny:connected", function(e) {
                         dimension[0] = window.innerWidth;
