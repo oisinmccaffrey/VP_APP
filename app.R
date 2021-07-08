@@ -122,18 +122,23 @@ is.na(vcf_master$ID_) <-
   startsWith(vcf_master$ID_, "22")|
   startsWith(vcf_master$ID_, "X")
 
+#Rename seqnames
+vcf_master <- dplyr::rename(vcf_master, Chr = seqnames)
+
 #Remove all the NAs from the ID_ column.. leaving just those with valid accession number
 vcf_master <- vcf_master %>% drop_na(ID_)
 vcf_master <- vcf_master %>% drop_na(CADD_SCALED)
 vcf_master <- vcf_master %>% drop_na(EXAC_AF)
-vcf_master <- vcf_master %>% drop_na(seqnames)
+vcf_master <- vcf_master %>% drop_na(Chr)
+
+
 
 # transform CADD_SCALED column to be numeric data
 vcf_master <- transform(vcf_master, CADD_SCALED = as.numeric(CADD_SCALED))
 vcf_master <- transform(vcf_master, EXAC_AF = as.numeric(EXAC_AF))
 
 vcf_master <- transform(vcf_master, ID_ = as.character(ID_))
-vcf_master <- transform(vcf_master, seqnames = as.numeric(seqnames))
+
 
 #Reorder the ID_ column to be rank in terms of CADD_SCALED score
 vcf_master$ID_ <- reorder(vcf_master$ID_, vcf_master$CADD_SCALED)
@@ -146,7 +151,7 @@ vcf_master$EXAC_AF <- log(vcf_master$EXAC_AF)
 #Creating a gene dataframe for the genes table, selecting relevant columns
 genes <- vcf_master %>% select(c(Symbol, 
                                  Gene, 
-                                 seqnames, 
+                                 Chr, 
                                  start, 
                                  REF, 
                                  Allele, 
@@ -156,7 +161,6 @@ genes <- vcf_master %>% select(c(Symbol,
 
 #Renaming the columns to more intuitive names
 genes <- dplyr::rename(genes, 
-                       Chr = seqnames, 
                        From = REF, 
                        To = Allele, 
                        HGNC = Symbol,
@@ -167,11 +171,17 @@ genes$Consequence <- gsub("_", " ", genes$Consequence)
 #Substitute "&" for " and "
 genes$Consequence <- gsub("&", " and ", genes$Consequence)
 
-#Rounding the CADD values to nearest whole number
+#Rounding the CADD values to nearest whole number using gsub
 
 vcf_master$CADD_SCALED <- round(as.numeric(vcf_master$CADD_SCALED), digits=0)
 vcf_master$Consequence <- gsub("_", " ", vcf_master$Consequence)
 vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
+
+
+#Now using gsub for Status column
+
+vcf_master$Status <- gsub("SRR:", " ", vcf_master$Status)
+vcf_master$Status <- gsub("_", " ", vcf_master$Status)
 
 #Quality score dataframe
 
@@ -193,7 +203,7 @@ df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
 ID_plot_dataframe <- vcf_master
 ID_plot_dataframe <- as.data.frame(ID_plot_dataframe)
 ID_plot_dataframe <- transform(ID_plot_dataframe, ID_ = as.character(ID_))
-ID_plot_dataframe <- transform(ID_plot_dataframe, seqnames = as.numeric(seqnames))
+ID_plot_dataframe <- transform(ID_plot_dataframe, Chr = as.numeric(Chr))
 ID_plot_dataframe
 
 ### Beginning of Shiny App
@@ -626,7 +636,7 @@ server <- function(input, output, session) {
   output$gene_chromosome <- renderText({
     # display chromosome for gene with corresponding gene symbol query in search bar
     vcf_gene <- vcf_genes()
-    vcf_gene$seqnames
+    vcf_gene$Chr
   })
   
   output$gene_ref_variant <- renderText({
@@ -720,7 +730,7 @@ server <- function(input, output, session) {
 
       output$plot3 <- renderPlotly({
         
-       ID_location_plot <- ggplot(vcf_master, aes(x=ID_, y = seqnames, fill=Status)) + 
+       ID_location_plot <- ggplot(vcf_master, aes(x=ID_, y = Chr, fill=Status, CADD = CADD_SCALED)) + 
           coord_flip() +
           geom_point(size = 2) +
          ggtitle("Genomic location vs. Variant Status") +
@@ -731,30 +741,23 @@ server <- function(input, output, session) {
             panel.ontop = TRUE, 
             plot.background = element_rect(fill = "transparent",colour = NA),
             plot.margin = unit(c(0.5, 0.5, 2, 0.5), "cm")) +
+         theme(axis.title.x = element_text(angle = 0)) +
+         theme(axis.text.y = element_blank()) +
+         theme(axis.ticks.y = element_blank()) +
           
           scale_x_discrete("Accession ID") +
           scale_y_discrete("Genomic Location") +
          theme(plot.title = element_text(hjust = 0.5, face = "bold"))
          theme_bw() +
-          theme(
-            legend.text = element_text(size = 8),
-            legend.position = c(0.55, -0.2), # move to the bottom
-            legend.title = element_blank(),
-            legend.key.size = unit(0.9, "line"),
-            legend.spacing.x = unit(0.2, 'cm'),
-            legend.background = element_rect(
-              fill = "white",
-              size = 0.5,
-              colour = "white"
-            )
-          ) 
+           theme_minimal() +
+           theme(
+           legend.position= c(0.75, 0.92), legend.direction="horizontal",
+         legend.text = element_text(size = 6), 
+         legend.key.size = unit(0.6, "lines"),
+         legend.title = element_text(size =10))
+                            
        
-       ID_location_plot <- ID_location_plot + 
-                            theme(axis.title.x = element_text(angle = 0)) +
-                            theme(axis.text.y = element_blank()) +
-                            theme(axis.ticks.y = element_blank())
-       
-       ggplotly(ID_location_plot, width = (0.825*as.numeric(input$dimension[1])), 
+       ggplotly(ID_location_plot, tooltip = c("x", "y", "fill", "CADD"), width = (0.825*as.numeric(input$dimension[1])), 
                 height = (0.90*as.numeric(input$dimension[2])))
 
       })

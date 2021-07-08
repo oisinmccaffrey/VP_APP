@@ -387,6 +387,12 @@ df_QD <- transform(df_QD, QD = as.numeric(QD))
 df_QD
 ```
 
+
+```{r}
+vcf_master$Status
+```
+
+
 ```{r}
 QD_hist_plot <- ggplot(data=df_QD, aes(QD)) +
         geom_histogram(bins = 16, color = "black", fill = "#FF69B4") +
