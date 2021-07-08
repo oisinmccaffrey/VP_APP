@@ -222,6 +222,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                      
                      #SidebarMenu to create Home, 
                      #Pathogenicity, Genomic Data, VCF METRICS, About, and Raw Data Tabs
+                    
                      
                      sidebarMenu(
                        menuItem(
@@ -273,6 +274,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                      
                      #css the .content-wrapper to change background colour
                      #This Makes the pain page white as oppose to standard grey
+                     
                      tags$head(tags$style(HTML('/* body */
                                 .content-wrapper, .right-side {
                                 background-color: #FFFFFF;
@@ -313,7 +315,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                 in terms of their pathogenicity and role in known diseases, as well as providing additional 
                 functionality such as summary reports of metrics used in variant classification 
                 (e.g., quality, depth and allele frequency). 
-                The application provides a clinician with the ability to filter by gene panels, 
+                The application provides a clinician/user with the ability to filter by gene panels, 
                 and query affected genes via the OMIM API, returning gene-phenotype information supported by literature. 
                 As there is a veritable need for improvements to current variant prioritisation and visualisation methods, 
                 this project will provide substantial positive progress to the movement 
@@ -343,6 +345,8 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                
                        ),
                        
+                       #Use Javascript to detect the browser window size 
+                       #(initial size and any resize if you make window bigger)
                        
                        tabItem("CADD",
                                fluidRow(
@@ -350,8 +354,6 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                           fluidPage(
                                             tags$head(tags$script('
                                             
-                                            #Use Javascript to detect the browser window size 
-                                            #(initial size and any resize if you make window bigger)
                                             
                         var dimension = [0, 0];
                         $(document).on("shiny:connected", function(e) {
@@ -366,7 +368,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                         });
                          ')), 
                                             
-                                            #WithSpinner to create red spinning logo while plot loads
+                                        
                                             
                                             plotlyOutput("plot2", width = "auto") %>% withSpinner(color = "red")
                                             
@@ -374,14 +376,14 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                           )
                                  ))),
                        
+                       #Use Javascript to detect the browser window size 
+                       #(initial size and any resize if you make window bigger)
+                       
                        tabItem("Status",
                                fluidRow(
                                  tabPanel("Status",
                                           fluidPage(
                                             tags$head(tags$script('
-                                            
-                                            #Use Javascript to detect the browser window size 
-                                            #(initial size and any resize if you make window bigger)
                                             
                         var dimension = [0, 0];
                         $(document).on("shiny:connected", function(e) {
