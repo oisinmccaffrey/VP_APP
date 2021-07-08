@@ -730,7 +730,7 @@ server <- function(input, output, session) {
 
       output$plot3 <- renderPlotly({
         
-       ID_location_plot <- ggplot(vcf_master, aes(x=ID_, y = Chr, fill=Status, CADD = CADD_SCALED)) + 
+       ID_location_plot <- ggplot(vcf_master, aes(x=ID_, y = Chr, fill=Status, CADD = CADD_SCALED, Consequence = Consequence)) + 
           coord_flip() +
           geom_point(size = 2) +
          ggtitle("Genomic location vs. Variant Status") +
@@ -739,6 +739,9 @@ server <- function(input, output, session) {
             panel.background = element_blank(),
             panel.grid = element_blank(),
             panel.ontop = TRUE, 
+            panel.grid.major.x = element_line(colour = "grey90", linetype = "dashed", size=0.15),
+            panel.grid.minor.x = element_blank(),
+            panel.grid.major.y = element_blank(),
             plot.background = element_rect(fill = "transparent",colour = NA),
             plot.margin = unit(c(0.5, 0.5, 2, 0.5), "cm")) +
          theme(axis.title.x = element_text(angle = 0)) +
@@ -749,7 +752,6 @@ server <- function(input, output, session) {
           scale_y_discrete("Genomic Location") +
          theme(plot.title = element_text(hjust = 0.5, face = "bold"))
          theme_bw() +
-           theme_minimal() +
            theme(
            legend.position= c(0.75, 0.92), legend.direction="horizontal",
          legend.text = element_text(size = 6), 
@@ -757,7 +759,7 @@ server <- function(input, output, session) {
          legend.title = element_text(size =10))
                             
        
-       ggplotly(ID_location_plot, tooltip = c("x", "y", "fill", "CADD"), width = (0.825*as.numeric(input$dimension[1])), 
+       ggplotly(ID_location_plot, tooltip = c("x", "y", "fill", "CADD", "Consequence"), width = (0.825*as.numeric(input$dimension[1])), 
                 height = (0.90*as.numeric(input$dimension[2])))
 
       })
