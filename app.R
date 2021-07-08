@@ -742,6 +742,7 @@ server <- function(input, output, session) {
             panel.grid.major.x = element_line(colour = "grey90", linetype = "dashed", size=0.15),
             panel.grid.minor.x = element_blank(),
             panel.grid.major.y = element_blank(),
+            panel.border = element_rect(colour = "black", fill=NA, size=0.5),
             plot.background = element_rect(fill = "transparent",colour = NA),
             plot.margin = unit(c(0.5, 0.5, 2, 0.5), "cm")) +
          theme(axis.title.x = element_text(angle = 0)) +
