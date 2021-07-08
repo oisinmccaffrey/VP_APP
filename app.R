@@ -70,7 +70,7 @@ for(i in 1:nrow(vcf_master)){
 vcf_master <- cbind(vcf_master, collect_ann)
 # Then collect
 collect_rlv <- data.frame(Status=as.character(),
-                          METIN=as.character(),
+                          SRR=as.character(),
                           Prediction=as.character(),
                           CADD_Relevance=as.character())
 
@@ -80,7 +80,7 @@ for(i in 1:nrow(vcf_master)){
   rlv <- as.data.frame(t(unlist(rlv)))
   rlv <- rlv[,c(11,13,15,17)]
   colnames(rlv) <- c("Status", 
-                     "METIN", 
+                     "SRR", 
                      "Prediction", 
                      "CADD_Relevance")
   
@@ -221,7 +221,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                          icon = icon("medkit"),
                          startExpanded = TRUE,
                          menuSubItem("CADD", tabName = "CADD"),
-                         menuSubItem("Genomic Location", tabName = "Genomic_Location")),
+                         menuSubItem("Status", tabName = "Status")),
                        
                        menuItem(
                          text = "Genomic Data", 
@@ -351,9 +351,9 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                           )
                                  ))),
                        
-                       tabItem("Genomic_Location",
+                       tabItem("Status",
                                fluidRow(
-                                 tabPanel("Genomic Location Plot",
+                                 tabPanel("Status",
                                           fluidPage(
                                             tags$head(tags$script('
                         var dimension = [0, 0];
@@ -367,8 +367,9 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                         dimension[1] = window.innerHeight;
                         Shiny.onInputChange("dimension", dimension);
                         });
-                         ')), 
-                                            plotOutput("plot3", width = "auto") %>% withSpinner(color = "red")
+                         ')),
+                                            
+                                            plotlyOutput("plot3", width = "auto") %>% withSpinner(color = "red")
                                             
                                             
                                           )
@@ -717,26 +718,24 @@ server <- function(input, output, session) {
       
       })
 
-    
-      output$plot3 <- renderPlot({
+      output$plot3 <- renderPlotly({
         
-        ggplot(vcf_master, aes(x=ID_, y = seqnames, fill=Status)) + 
+       ID_location_plot <- ggplot(vcf_master, aes(x=ID_, y = seqnames, fill=Status)) + 
           coord_flip() +
-          geom_point() +
+          geom_point(size = 2) +
+         ggtitle("Genomic location vs. Variant Status") +
           theme(
-            axis.line.y = element_blank(),
-            axis.ticks.y = element_blank(),
-            axis.line.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            axis.text.x = element_text(),
             axis.title.x = element_blank(),
             panel.background = element_blank(),
             panel.grid = element_blank(),
-            plot.margin = unit(c(0.5, 0.5, 2, 0.5), "cm"),
-            plot.title = element_text(size=8, face="bold")) +
+            panel.ontop = TRUE, 
+            plot.background = element_rect(fill = "transparent",colour = NA),
+            plot.margin = unit(c(0.5, 0.5, 2, 0.5), "cm")) +
           
           scale_x_discrete("Accession ID") +
           scale_y_discrete("Genomic Location") +
+         theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+         theme_bw() +
           theme(
             legend.text = element_text(size = 8),
             legend.position = c(0.55, -0.2), # move to the bottom
@@ -748,11 +747,15 @@ server <- function(input, output, session) {
               size = 0.5,
               colour = "white"
             )
-          ) +
-          
-          theme(axis.title.x = element_text(angle = 0)) +
-          theme(axis.text.y = element_blank()) +
-          theme(axis.ticks.y = element_blank())
+          ) 
+       
+       ID_location_plot <- ID_location_plot + 
+                            theme(axis.title.x = element_text(angle = 0)) +
+                            theme(axis.text.y = element_blank()) +
+                            theme(axis.ticks.y = element_blank())
+       
+       ggplotly(ID_location_plot, width = (0.825*as.numeric(input$dimension[1])), 
+                height = (0.90*as.numeric(input$dimension[2])))
 
       })
       
@@ -807,6 +810,7 @@ server <- function(input, output, session) {
       genes
       
     })   
+    
     
     #For downloading HTML report, not working atm
     output$report <- downloadHandler(

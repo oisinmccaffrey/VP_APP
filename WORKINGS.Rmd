@@ -227,6 +227,9 @@ qual_hist + geom_histogram(bins = 30, color = "black", fill = "#40E0D0") +
 ```
 
 
+```{r}
+head(vcf)
+```
 
 
 ```{r}
