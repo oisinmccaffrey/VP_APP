@@ -26,7 +26,6 @@ library(webshot)
 library(rvest) # Scraping data from websites
 library(lubridate) # fast and user friendly parsing of date-time data,
 
-
 #Importing the data, readVcf from VariantAnnotation package
 
 vcf <- readVcf("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/SRR.gavin_secondpass.vcf", "GRCh38")
@@ -272,6 +271,8 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                    
                    dashboardBody(
                      
+    
+                     
                      #css the .content-wrapper to change background colour
                      #This Makes the pain page white as oppose to standard grey
                      
@@ -287,6 +288,14 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                        tabItem(tabName = "home",
                                tags$head(
                                  includeCSS("www/styles.css")
+                               ),
+                               
+                               div(id = "page-topright",
+                                   div(class = "source_link", 
+                                       style="float:right", 
+                                       a(href = "https://github.com/oisinmccaffrey/VP_APP", 
+                                         "View source code on github", 
+                                         icon("github"))),
                                ),
                                
                                
@@ -485,6 +494,15 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                        
                        
                        tabItem("About",
+                               
+                               div(id = "page-topright",
+                                   div(class = "source_link", 
+                                       style="float:right", 
+                                       a(href = "https://github.com/oisinmccaffrey/VP_APP", 
+                                         "View source code on github", 
+                                         icon("github"))),
+                                   
+                               ),
                                br(),
                                br(),
                                br(),
@@ -496,6 +514,8 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                            href = "plugins/carousel.css"),
                                  tags$script(src = "plugins/holder.js")
                                ),
+                               
+                               
                                tags$style(type="text/css",
                                           ".shiny-output-error { visibility: hidden; }",
                                           ".shiny-output-error:before { visibility: hidden; }"
