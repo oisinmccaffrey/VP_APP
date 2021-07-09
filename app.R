@@ -565,7 +565,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                                 br(),  br(),
                                                 
                                             ),
-                                            plotOutput("qual_hist_plot") %>% withSpinner(color = "red")
+                                            plotlyOutput("qual_hist_plot") %>% withSpinner(color = "red")
 
                                           )))),
                        
@@ -607,7 +607,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                             br(),  br(),
                                             
                                           ),
-                                          plotOutput("dp_hist_plot") %>% withSpinner(color = "red")
+                                          plotlyOutput("dp_hist_plot") %>% withSpinner(color = "red")
                                  ))),
                        
                        
@@ -639,7 +639,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                                 tags$a(href = "https://gatk.broadinstitute.org/hc/en-us", "GATK")  
                                             ),
                                           ),
-                                          plotOutput("MQ_hist_plot") %>% withSpinner(color = "red")
+                                          plotlyOutput("MQ_hist_plot") %>% withSpinner(color = "red")
                                  )
                                  
                                )))))
@@ -805,8 +805,9 @@ server <- function(input, output, session) {
       })
       
     
-    output$qual_hist_plot <- renderPlot({
-      ggplot(df, aes(QUAL)) +
+    output$qual_hist_plot <- renderPlotly({
+      
+      qual_plot <- ggplot(df, aes(QUAL)) +
         geom_histogram(bins = 30, color = "black", fill = "#00FFFF") +
         geom_vline(aes(xintercept = mean(QUAL)), 
                    linetype = "dashed", size = 0.6) +
@@ -820,13 +821,14 @@ server <- function(input, output, session) {
         ylab("Frequency") +
         theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) 
       
+      ggplotly(qual_plot)
+      
     })
     
-    output$dp_hist_plot <- renderPlot({
+    output$dp_hist_plot <- renderPlotly({
       
-      dp_hist <- ggplot(data=df_DP, aes(DP)) 
-      
-      dp_hist + geom_histogram(bins = 16, color = "black", fill = "#5CD85A") +
+      dp_hist <- ggplot(data=df_DP, aes(DP)) + 
+        geom_histogram(bins = 16, color = "black", fill = "#5CD85A") +
         ggtitle("Read Depth (DP)") +
         theme_minimal() +
         geom_vline(aes(xintercept = mean(DP)), 
@@ -835,11 +837,14 @@ server <- function(input, output, session) {
         ylab("Frequency") +
         theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) 
       
+      ggplotly(dp_hist)
+      
     })
     
-    output$MQ_hist_plot <- renderPlot({
-      MQ_hist <- ggplot(data=df_MQ, aes(MQ)) 
-      MQ_hist + geom_histogram(bins = 16, color = "black", fill = "#0059b3") +
+    output$MQ_hist_plot <- renderPlotly({
+      
+      MQ_hist <- ggplot(data=df_MQ, aes(MQ)) + 
+        geom_histogram(bins = 16, color = "black", fill = "#0059b3") +
         ggtitle("Mapping Quality (MQ)") +
         theme_minimal() +
         scale_x_continuous(limits = c(55, 65), 
@@ -849,6 +854,8 @@ server <- function(input, output, session) {
         theme(plot.title = element_text(hjust = 0.5, face = "bold")) +
         ylab("Frequency") +
         theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) 
+      
+      ggplotly(MQ_hist)
     })
     
     output$genomic_plot <- DT::renderDataTable({
