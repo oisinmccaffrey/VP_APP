@@ -1,14 +1,9 @@
-```html
-<h2>Variant Prioritisation</h2>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+</head>
+<body>
+<h1 id="Title">Variant Prioritisation</h1>
 
-<pre>
-    <div class="container">
-        <div class="block two first">
-            <h2>Your title</h2>
-            <div class="wrap">
-            //Your content
-            </div>
-        </div>
-    </div>
-</pre>
-```
+<h2 id="Objective">Objective</h2>
