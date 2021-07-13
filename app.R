@@ -221,9 +221,10 @@ vcf_master_plots_Status <- vcf_master_plots %>% drop_na(ID_)
 
 new_dataset <- vcf_master_plots %>% dplyr::select(c(ID_, Chr, Status, CADD_SCALED, Consequence, EXAC_AF))
 vcf_master_plots_CADD_Others <- vcf_master_plots_CADD_Others %>% dplyr::select(c(ID_, Chr, Status, CADD_SCALED_SCORE, Consequence, EXAC_AF))
+
 vcf_master_plots_CADD_Others <- dplyr::rename(vcf_master_plots_CADD_Others,
                                               ID_Other = ID_,
-                                              Chr_Othe = Chr,
+                                              Chr_Other = Chr,
                                               Status_Other = Status,
                                               CADD_SCALED_OTHER = CADD_SCALED_SCORE,
                                               Consequence_Other = Consequence,
@@ -237,6 +238,8 @@ new_dataset <- new_dataset %>% unite("CADD_ALL", CADD_SCALED_OTHER, CADD_SCALED)
 new_dataset <- new_dataset %>% unite("ID_ALL", ID_, ID_Other)
 new_dataset <- new_dataset %>% unite("EXAC_AF_ALL", EXAC_AF_Other, EXAC_AF)
 new_dataset <- new_dataset %>% unite("Consequence_ALL", Consequence_Other, Consequence)
+new_dataset <- new_dataset %>% unite("Status_ALL", Status, Status_Other)
+new_dataset <- new_dataset %>% unite("Chr_ALL", Chr_Other, Chr)
 
 
 new_dataset$CADD_ALL <- sub("_NA", " ", new_dataset$CADD_ALL)
@@ -247,7 +250,13 @@ new_dataset$EXAC_AF_ALL <- sub("_NA", " ", new_dataset$EXAC_AF_ALL)
 new_dataset$EXAC_AF_ALL <- sub("NA_", " ", new_dataset$EXAC_AF_ALL)
 new_dataset$Consequence_ALL <- sub("_NA", " ", new_dataset$Consequence_ALL)
 new_dataset$Consequence_ALL <- sub("NA_", " ", new_dataset$Consequence_ALL)
+new_dataset$Status_ALL <- sub("_NA", " ", new_dataset$Status_ALL)
+new_dataset$Status_ALL <- sub("NA_", " ", new_dataset$Status_ALL)
+new_dataset$Chr_ALL <- sub("_NA", " ", new_dataset$Chr_ALL)
+new_dataset$Chr_ALL <- sub("NA_", " ", new_dataset$Chr_ALL)
 
+new_dataset$Status_ALL <- gsub("SRR:", " ", new_dataset$Status_ALL)
+new_dataset$Status_ALL <- gsub("_", " ", new_dataset$Status_ALL)
 
 new_dataset <- transform(new_dataset, CADD_ALL = as.numeric(CADD_ALL))
 new_dataset <- transform(new_dataset, EXAC_AF_ALL = as.numeric(EXAC_AF_ALL))
@@ -257,6 +266,11 @@ new_dataset <- transform(new_dataset, CADD_ALL = as.numeric(CADD_ALL))
 new_dataset <- transform(new_dataset, EXAC_AF_ALL = as.numeric(EXAC_AF_ALL))
 new_dataset <- transform(new_dataset, ID_ALL = as.character(ID_ALL))
 new_dataset <- transform(new_dataset, Consequence_ALL = as.character(Consequence_ALL))
+
+
+new_dataset1 <- transform(new_dataset, Chr_ALL = as.factor(Chr_ALL))
+chrOrder<-c(paste(1:22,sep=""),"X")
+new_dataset1 %>% arrange(match(Chr_ALL, c("1", "2","3","4","5","6","7","8","9","10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X")))
 
 
 ### Beginning of Shiny App
@@ -856,7 +870,7 @@ server <- function(input, output, session) {
 
       output$plot3 <- renderPlotly({
         
-       ID_location_plot <- ggplot(vcf_master_plots_Status, aes(x=ID_, y = Chr, fill=Status, CADD = CADD_SCALED, Consequence = Consequence)) + 
+       ID_location_plot <- ggplot(new_dataset1, aes(x=ID_ALL, y = Chr_ALL, fill=Status_ALL, CADD = CADD_ALL, Consequence = Consequence_ALL)) + 
           coord_flip() +
           geom_point(size = 2) +
          ggtitle("Genomic location vs. Variant Status") +
