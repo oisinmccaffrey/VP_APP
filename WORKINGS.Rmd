@@ -580,6 +580,14 @@ vcf_master_plots_CADD
 
 ifelse(x > median(x),"up","down"))
 
+
+
+CLICK
+
+
+
+
+
 ```{r}
 vcf_master_plots$Other <- ifelse(is.na(vcf_master_plots$CADD_SCALED), "Other", "Has CADD Score")
 ```
@@ -605,13 +613,103 @@ vcf_master_plots_CADD_Others
 ```
 
 
+```{r}
+vcf_master_plots_CADD_Others
+```
+
 
 ```{r}
-
-final_CADD_df <- dplyr::bind_rows(vcf_master_plots, vcf_master_plots_CADD_Others)
+new_dataset <- vcf_master_plots %>% dplyr::select(c(ID_, Chr, Status, CADD_SCALED, Consequence, EXAC_AF))
 ```
 
 ```{r}
-final_CADD_df
+library(dplyr)
+library(stringr)
+library(tidyr)
+```
+
+
+                      
+
+```{r}
+vcf_master_plots_CADD_Others <- vcf_master_plots_CADD_Others %>% dplyr::select(c(ID_, Chr, Status, CADD_SCALED_SCORE, Consequence, EXAC_AF))
+vcf_master_plots_CADD_Others
+```
+
+```{r}
+vcf_master_plots_CADD_Others <- dplyr::rename(vcf_master_plots_CADD_Others,
+                                              ID_Other = ID_,
+                                              Chr_Othe = Chr,
+                                              Status_Other = Status,
+                                              CADD_SCALED_OTHER = CADD_SCALED_SCORE,
+                                              Consequence_Other = Consequence,
+                                              EXAC_AF_Other = EXAC_AF)
+```
+
+```{r}
+vcf_master_plots_CADD_Others
+```
+
+
+
+```{r}
+new_dataset <- dplyr::bind_rows(vcf_master_plots_CADD_Others, vcf_master_plots)
+```
+
+ID_plot_dataframe <- transform(ID_plot_dataframe, Chr = as.numeric(Chr))
+
+```{r}
+new_dataset <- transform(new_dataset, CADD_SCALED_OTHER = as.numeric(CADD_SCALED_OTHER))
+```
+
+```{r}
+new_dataset
+```
+
+
+```{r}
+new_dataset <- new_dataset %>% unite("CADD_ALL", CADD_SCALED_OTHER, CADD_SCALED)
+new_dataset <- new_dataset %>% unite("ID_ALL", ID_, ID_Other)
+new_dataset <- new_dataset %>% unite("EXAC_AF_ALL", EXAC_AF_Other, EXAC_AF)
+new_dataset <- new_dataset %>% unite("Consequence_ALL", Consequence_Other, Consequence)
+```
+
+
+
+```{r}
+new_dataset
+```
+
+
+
+
+```{r}
+new_dataset$CADD_ALL <- sub("_NA", " ", new_dataset$CADD_ALL)
+new_dataset$CADD_ALL <- sub("NA_", " ", new_dataset$CADD_ALL)
+new_dataset$ID_ALL <- sub("_NA", " ", new_dataset$ID_ALL)
+new_dataset$ID_ALL <- sub("NA_", " ", new_dataset$ID_ALL)
+new_dataset$EXAC_AF_ALL <- sub("_NA", " ", new_dataset$EXAC_AF_ALL)
+new_dataset$EXAC_AF_ALL <- sub("NA_", " ", new_dataset$EXAC_AF_ALL)
+new_dataset$Consequence_ALL <- sub("_NA", " ", new_dataset$Consequence_ALL)
+new_dataset$Consequence_ALL <- sub("NA_", " ", new_dataset$Consequence_ALL)
+```
+
+```{r}
+new_dataset
+```
+
+
+
+```{r}
+new_dataset <- transform(new_dataset, CADD_ALL = as.numeric(CADD_ALL))
+```
+
+```{r}
+new_dataset <- new_dataset %>% drop_na(CADD_ALL)
+```
+
+
+```{r}
+new_dataset
 ```
 

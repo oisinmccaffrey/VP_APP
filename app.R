@@ -125,16 +125,12 @@ is.na(vcf_master$ID_) <-
 vcf_master <- dplyr::rename(vcf_master, Chr = seqnames)
 
 #Remove all the NAs from the ID_ column.. leaving just those with valid accession number
-vcf_master_plots <- vcf_master %>% drop_na(ID_)
-vcf_master_plots <- vcf_master %>% drop_na(CADD_SCALED)
-vcf_master_plots <- vcf_master %>% drop_na(EXAC_AF)
-vcf_master_plots <- vcf_master %>% drop_na(Chr)
+
 
 
 # transform CADD_SCALED column to be numeric data
 vcf_master_plots <- transform(vcf_master_plots, CADD_SCALED = as.numeric(CADD_SCALED))
 vcf_master_plots <- transform(vcf_master_plots, EXAC_AF = as.numeric(EXAC_AF))
-
 vcf_master_plots <- transform(vcf_master_plots, ID_ = as.character(ID_))
 
 
@@ -147,7 +143,7 @@ vcf_master_plots$EXAC_AF <- log(vcf_master_plots$EXAC_AF)
 
 
 #Creating a gene dataframe for the genes table, selecting relevant columns
-genes <- vcf_master %>% dplyr::select(c(Symbol, 
+genes <- vcf_master_plots %>% dplyr::select(c(Symbol, 
                                  Gene, 
                                  Chr, 
                                  start, 
@@ -220,6 +216,47 @@ vcf_master_plots_CADD_Others$CADD_SCALED_SCORE <- str_extract(vcf_master_plots_C
 
 
 vcf_master_plots_Status <- vcf_master_plots %>% drop_na(ID_)
+
+
+
+new_dataset <- vcf_master_plots %>% dplyr::select(c(ID_, Chr, Status, CADD_SCALED, Consequence, EXAC_AF))
+vcf_master_plots_CADD_Others <- vcf_master_plots_CADD_Others %>% dplyr::select(c(ID_, Chr, Status, CADD_SCALED_SCORE, Consequence, EXAC_AF))
+vcf_master_plots_CADD_Others <- dplyr::rename(vcf_master_plots_CADD_Others,
+                                              ID_Other = ID_,
+                                              Chr_Othe = Chr,
+                                              Status_Other = Status,
+                                              CADD_SCALED_OTHER = CADD_SCALED_SCORE,
+                                              Consequence_Other = Consequence,
+                                              EXAC_AF_Other = EXAC_AF)
+
+new_dataset <- dplyr::bind_rows(vcf_master_plots_CADD_Others, vcf_master_plots)
+
+
+new_dataset <- transform(new_dataset, CADD_SCALED_OTHER = as.numeric(CADD_SCALED_OTHER))
+new_dataset <- new_dataset %>% unite("CADD_ALL", CADD_SCALED_OTHER, CADD_SCALED)
+new_dataset <- new_dataset %>% unite("ID_ALL", ID_, ID_Other)
+new_dataset <- new_dataset %>% unite("EXAC_AF_ALL", EXAC_AF_Other, EXAC_AF)
+new_dataset <- new_dataset %>% unite("Consequence_ALL", Consequence_Other, Consequence)
+
+
+new_dataset$CADD_ALL <- sub("_NA", " ", new_dataset$CADD_ALL)
+new_dataset$CADD_ALL <- sub("NA_", " ", new_dataset$CADD_ALL)
+new_dataset$ID_ALL <- sub("_NA", " ", new_dataset$ID_ALL)
+new_dataset$ID_ALL <- sub("NA_", " ", new_dataset$ID_ALL)
+new_dataset$EXAC_AF_ALL <- sub("_NA", " ", new_dataset$EXAC_AF_ALL)
+new_dataset$EXAC_AF_ALL <- sub("NA_", " ", new_dataset$EXAC_AF_ALL)
+new_dataset$Consequence_ALL <- sub("_NA", " ", new_dataset$Consequence_ALL)
+new_dataset$Consequence_ALL <- sub("NA_", " ", new_dataset$Consequence_ALL)
+
+
+new_dataset <- transform(new_dataset, CADD_ALL = as.numeric(CADD_ALL))
+new_dataset <- transform(new_dataset, EXAC_AF_ALL = as.numeric(EXAC_AF_ALL))
+new_dataset <- new_dataset %>% drop_na(CADD_ALL)
+
+new_dataset <- transform(new_dataset, CADD_ALL = as.numeric(CADD_ALL))
+new_dataset <- transform(new_dataset, EXAC_AF_ALL = as.numeric(EXAC_AF_ALL))
+new_dataset <- transform(new_dataset, ID_ALL = as.character(ID_ALL))
+new_dataset <- transform(new_dataset, Consequence_ALL = as.character(Consequence_ALL))
 
 
 ### Beginning of Shiny App
@@ -671,80 +708,109 @@ server <- function(input, output, session) {
     } else if(!(input$searchvcf %in% vcf_master$Symbol)){
       shinyalert("Invalid Gene Symbol Entered", "Please Enter a Valid Gene Symbol", type = "error")
     }
+    
   }) 
   
+  # Creating reactive functions for the 'Gene Overview' table underneath 
+  # the 'Genomic Data' sidebar panel..
+  
   vcf_genes <- reactive({
+    
     # filter clinical data based on gene symbol entered in searchbar
-    vcf_master %>% filter(Symbol == input$searchvcf) 
+    vcf_master_plots %>% filter(Symbol == input$searchvcf) 
     
   })
   
+  
   output$gene_symbol <- renderText({
+    
     # display gene symbol corresponding to gene query in search bar
     vcf_gene <- vcf_genes()
     vcf_gene$Symbol <- as.character(vcf_gene$Symbol)
     
   })
   
+  
   output$gene_chromosome <- renderText({
+    
     # display chromosome for gene with corresponding gene symbol query in search bar
     vcf_gene <- vcf_genes()
     vcf_gene$Chr
+    
   })
   
+  
   output$gene_ref_variant <- renderText({
+    
     # display reference variant for gene with corresponding gene symbol query in search bar
     vcf_gene <- vcf_genes()
     vcf_gene$REF
+    
+    
   })
   
+  
   output$gene_alt_variant <- renderText({
+    
     # display alternative variant for gene with corresponding gene symbol query in search bar
     vcf_gene <- vcf_genes()
     vcf_gene$Allele
+    
   })
   
+  
   output$gene_consequence <- renderText({
+    
     # display the consequence of the variant for gene with corresponding gene symbol query in search bar
     vcf_gene <- vcf_genes()
     vcf_gene$Consequence
+    
   })
   
   output$gene_maf <- renderText({
+    
     # display the consequence of the variant for gene with corresponding gene symbol query in search bar
     vcf_gene <- vcf_genes()
     vcf_gene$EXAC_AF
+    
   })
   
   output$gene_impact <- renderText({
+    
     # display the impact for gene with corresponding gene symbol query in search bar
     vcf_gene <- vcf_genes()
     vcf_gene$IMPACT
+    
   })
   
   output$gene_cadd <- renderText({
+    
     # display CADD score for gene with corresponding gene symbol query in search bar
     vcf_gene <- vcf_genes()
     vcf_gene$CADD_Relevance
+    
   })
   
   output$plot1 <- DT::renderDataTable({
+    
     vcf_master
+    
   })
+  
+  # Creating interactive plot for CADD vs MAF for each variant
+  # The user can filter the interactive plot by the type of variant 
+  # e.g. missense/stop gain. Moreover, one can hover over individual points 
+  # (variants) to attain the relevant ExAC minor allele frequency, CADD score,  
+  # Consequence  (e.g.  missense  variant)  and  
+  # SNP ID (e.g. rs200203535) for each variant 
   
   observeEvent(input$dimension,{
     output$plot2 <- renderPlotly({
       
-      cadd_id_plot <- ggplot(data = vcf_master_plots_CADD, 
-                             aes(x=EXAC_AF, y = as.factor(CADD_SCALED), fill = Consequence, ID = ID_)) + 
+      cadd_id_plot <- ggplot(data = new_dataset, 
+                           aes(x=EXAC_AF_ALL, y = as.factor(CADD_ALL), fill = Consequence_ALL, ID = ID_ALL)) + 
         geom_point(size = 2) +
-        geom_point(data = vcf_master_plots_CADD_Others) +
         ggtitle("CADD Score vs. Minor Allele Frequency") +
-        scale_y_discrete(limits = c(15, 50,
-                                    breaks = c(15,  20,  30, 40, 50, 60),
-                                    labels = c("15", "20", "30", "40","50", "60"),
-                                    expand=c(0,0),
-                                    name = "CADD SCORE") +
                            
                            scale_x_discrete("Minor Allele Frequency: 10^X:") +
                            theme_minimal() +
@@ -765,29 +831,34 @@ server <- function(input, output, session) {
                              legend.position= c(0.75, 0.92), legend.direction="horizontal",
                              legend.text = element_text(size = 6), 
                              legend.key.size = unit(0.6, "lines"),
-                             legend.title = element_text(size =10)))
+                             legend.title = element_text(size =10))
       
       cadd_id_plot <- cadd_id_plot + ylab("CADD Score") + 
         theme(axis.title.y = element_text(angle = 0)) +
         theme_bw() +
+        scale_y_discrete() +
         xlab("Minor Allele Frequency: 10^X:") + 
         theme(plot.title = element_text(hjust = 0.5, face = "bold"))
         theme(axis.title.x = element_text(angle = 0))
       
       
-      
+      #tooltip used to ensure we can hover each point and obtain relevant information
+        
       ggplotly(cadd_id_plot, tooltip = c("x", "y", "ID", "fill"), width = (0.825*as.numeric(input$dimension[1])), 
                height = (0.90*as.numeric(input$dimension[2])))
 
       
       })
+    
+    
+    # Creating interactive plot for the 'Status' of each variant
+    # Informs us on the types of variants on each chromosome in the file.
 
       output$plot3 <- renderPlotly({
         
        ID_location_plot <- ggplot(vcf_master_plots_Status, aes(x=ID_, y = Chr, fill=Status, CADD = CADD_SCALED, Consequence = Consequence)) + 
           coord_flip() +
           geom_point(size = 2) +
-         geom_point(data = vcf_master_plots_CADD_Others) +
          ggtitle("Genomic location vs. Variant Status") +
           theme(
             axis.title.x = element_blank(),
@@ -820,6 +891,10 @@ server <- function(input, output, session) {
 
       })
       
+      
+      # The following histograms are featured under 'VCF' metrics.
+      # Creating histograms of the quality, read depth, and mapping quality 
+      # of the VCF file.
     
     output$qual_hist_plot <- renderPlotly({
       
