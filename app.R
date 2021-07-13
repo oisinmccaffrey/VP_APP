@@ -125,30 +125,29 @@ is.na(vcf_master$ID_) <-
 vcf_master <- dplyr::rename(vcf_master, Chr = seqnames)
 
 #Remove all the NAs from the ID_ column.. leaving just those with valid accession number
-vcf_master <- vcf_master %>% drop_na(ID_)
-vcf_master <- vcf_master %>% drop_na(CADD_SCALED)
-vcf_master <- vcf_master %>% drop_na(EXAC_AF)
-vcf_master <- vcf_master %>% drop_na(Chr)
-
+vcf_master_plots <- vcf_master %>% drop_na(ID_)
+vcf_master_plots <- vcf_master %>% drop_na(CADD_SCALED)
+vcf_master_plots <- vcf_master %>% drop_na(EXAC_AF)
+vcf_master_plots <- vcf_master %>% drop_na(Chr)
 
 
 # transform CADD_SCALED column to be numeric data
-vcf_master <- transform(vcf_master, CADD_SCALED = as.numeric(CADD_SCALED))
-vcf_master <- transform(vcf_master, EXAC_AF = as.numeric(EXAC_AF))
+vcf_master_plots <- transform(vcf_master_plots, CADD_SCALED = as.numeric(CADD_SCALED))
+vcf_master_plots <- transform(vcf_master_plots, EXAC_AF = as.numeric(EXAC_AF))
 
-vcf_master <- transform(vcf_master, ID_ = as.character(ID_))
+vcf_master_plots <- transform(vcf_master_plots, ID_ = as.character(ID_))
 
 
 #Reorder the ID_ column to be rank in terms of CADD_SCALED score
-vcf_master$ID_ <- reorder(vcf_master$ID_, vcf_master$CADD_SCALED)
+vcf_master_plots$ID_ <- reorder(vcf_master_plots$ID_, vcf_master_plots$CADD_SCALED)
 
 
 #Log scale ExAC AF
-vcf_master$EXAC_AF <- log(vcf_master$EXAC_AF)
+vcf_master_plots$EXAC_AF <- log(vcf_master_plots$EXAC_AF)
 
 
 #Creating a gene dataframe for the genes table, selecting relevant columns
-genes <- vcf_master %>% select(c(Symbol, 
+genes <- vcf_master %>% dplyr::select(c(Symbol, 
                                  Gene, 
                                  Chr, 
                                  start, 
@@ -172,15 +171,15 @@ genes$Consequence <- gsub("&", " and ", genes$Consequence)
 
 #Rounding the CADD values to nearest whole number using gsub
 
-vcf_master$CADD_SCALED <- round(as.numeric(vcf_master$CADD_SCALED), digits=0)
-vcf_master$Consequence <- gsub("_", " ", vcf_master$Consequence)
-vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
+vcf_master_plots$CADD_SCALED <- round(as.numeric(vcf_master_plots$CADD_SCALED), digits=0)
+vcf_master_plots$Consequence <- gsub("_", " ", vcf_master_plots$Consequence)
+vcf_master_plots$Consequence <- gsub("&", " and ", vcf_master_plots$Consequence)
 
 
 #Now using gsub for Status column
 
-vcf_master$Status <- gsub("SRR:", " ", vcf_master$Status)
-vcf_master$Status <- gsub("_", " ", vcf_master$Status)
+vcf_master_plots$Status <- gsub("SRR:", " ", vcf_master_plots$Status)
+vcf_master_plots$Status <- gsub("_", " ", vcf_master_plots$Status)
 
 #Quality score dataframe
 
@@ -204,6 +203,24 @@ ID_plot_dataframe <- as.data.frame(ID_plot_dataframe)
 ID_plot_dataframe <- transform(ID_plot_dataframe, ID_ = as.character(ID_))
 ID_plot_dataframe <- transform(ID_plot_dataframe, Chr = as.numeric(Chr))
 ID_plot_dataframe
+
+#Creating CADD and Status df to remove NA's from plots
+
+#With some of the variants in the file, the CADD score is not under the relevant
+#'CADD SCALED Score' column.. therefore it requires extracting from the 'CADD_Relevance'
+# Column which provides information on the variant.
+
+#This extraction is performed using the package (stringr) and the function str_extract
+#We are taking the numerical value after 'Score of' i.e. CADD score of.. 
+
+vcf_master_plots_CADD <- vcf_master_plots %>% drop_na(CADD_SCALED)
+vcf_master_plots$Other <- ifelse(is.na(vcf_master_plots$CADD_SCALED), "Other", "Has CADD Score")
+vcf_master_plots_CADD_Others <- vcf_master_plots[vcf_master_plots$Other != "Has CADD Score", ]
+vcf_master_plots_CADD_Others$CADD_SCALED_SCORE <- str_extract(vcf_master_plots_CADD_Others$CADD_Relevance, '(?i) (?<=score of\\D)\\d+')
+
+
+vcf_master_plots_Status <- vcf_master_plots %>% drop_na(ID_)
+
 
 ### Beginning of Shiny App
 
@@ -718,13 +735,14 @@ server <- function(input, output, session) {
   observeEvent(input$dimension,{
     output$plot2 <- renderPlotly({
       
-      cadd_id_plot <- ggplot(data = vcf_master, 
+      cadd_id_plot <- ggplot(data = vcf_master_plots_CADD, 
                              aes(x=EXAC_AF, y = as.factor(CADD_SCALED), fill = Consequence, ID = ID_)) + 
         geom_point(size = 2) +
+        geom_point(data = vcf_master_plots_CADD_Others) +
         ggtitle("CADD Score vs. Minor Allele Frequency") +
         scale_y_discrete(limits = c(15, 50,
-                                    breaks = c(15,  20,  30, 40, 50),
-                                    labels = c("15", "20", "30", "40","50"),
+                                    breaks = c(15,  20,  30, 40, 50, 60),
+                                    labels = c("15", "20", "30", "40","50", "60"),
                                     expand=c(0,0),
                                     name = "CADD SCORE") +
                            
@@ -766,9 +784,10 @@ server <- function(input, output, session) {
 
       output$plot3 <- renderPlotly({
         
-       ID_location_plot <- ggplot(vcf_master, aes(x=ID_, y = Chr, fill=Status, CADD = CADD_SCALED, Consequence = Consequence)) + 
+       ID_location_plot <- ggplot(vcf_master_plots_Status, aes(x=ID_, y = Chr, fill=Status, CADD = CADD_SCALED, Consequence = Consequence)) + 
           coord_flip() +
           geom_point(size = 2) +
+         geom_point(data = vcf_master_plots_CADD_Others) +
          ggtitle("Genomic location vs. Variant Status") +
           theme(
             axis.title.x = element_blank(),

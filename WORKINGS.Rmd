@@ -53,6 +53,8 @@ library(tibble)
 ```
 
 
+
+
 ```{r}
 library(VariantAnnotation)
 vcf <- readVcf("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/SRR.gavin_secondpass.vcf", "GRCh38")
@@ -105,7 +107,27 @@ vcf_master$Allele <- gsub("[^A-Za-z0-9]", "", vcf_master$Allele)
 vcf_master <- vcf_master %>% tibble::rownames_to_column(var = "ID_")
 
 is.na(vcf_master$ID_) <- startsWith(vcf_master$ID_, "1") | startsWith(vcf_master$ID_, "2") | startsWith(vcf_master$ID_, "3") | startsWith(vcf_master$ID_, "4") | startsWith(vcf_master$ID_, "5") | startsWith(vcf_master$ID_, "6") | startsWith(vcf_master$ID_, "7") | startsWith(vcf_master$ID_, "8") | startsWith(vcf_master$ID_, "9") | startsWith(vcf_master$ID_, "10") | startsWith(vcf_master$ID_, "11") | startsWith(vcf_master$ID_, "12") | startsWith(vcf_master$ID_, "13") | startsWith(vcf_master$ID_, "14") | startsWith(vcf_master$ID_, "15") | startsWith(vcf_master$ID_, "16") | startsWith(vcf_master$ID_, "17") | startsWith(vcf_master$ID_, "18") | startsWith(vcf_master$ID_, "19") | startsWith(vcf_master$ID_, "20") | startsWith(vcf_master$ID_, "21") | startsWith(vcf_master$ID_, "22") | startsWith(vcf_master$ID_, "X")
+
 ```
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+vcf_master
+```
+
+
+
+
+
+
+```{r}
+vcf_master_validID
+```
+
+
 
 
 ```{r}
@@ -472,4 +494,124 @@ ID_location_plot <- ID_location_plot + theme(axis.ticks.y = element_blank())
 ggplotly(ID_location_plot)
 ```
 
+```{r}
+library(VariantAnnotation)
+```
+
+```{r}
+
+```
+
+
+```{r}
+summarizeVariants(vcf)
+```
+
+```{r}
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+```
+
+```{r}
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+```
+
+```{r}
+vcf1 <- readVcf("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/SRR.gavin_secondpass.vcf", "hg38")
+## Rename seqlevels to match TxDb; confirm the match.
+seqlevels(vcf1) <- paste0("chr", seqlevels(vcf1))
+intersect(seqlevels(vcf1), seqlevels(txdb))
+```
+
+
+```{r}
+## ----------------------------------------
+## Counting with locateVariants()
+## ----------------------------------------
+## TxDb as the 'query'
+coding1 <- summarizeVariants(txdb, vcf1, CodingVariants()) 
+colSums(assays(coding1)$counts)
+## GRangesList as the 'query'
+cdsbytx <- cdsBy(txdb, "tx")
+coding2 <- summarizeVariants(cdsbytx, vcf1, CodingVariants())
+stopifnot(identical(assays(coding1)$counts, assays(coding2)$counts))
+## Promoter region variants summarized by transcript
+tx <- transcripts(txdb)
+txlst <- splitAsList(tx, seq_len(length(tx)))
+promoter <- summarizeVariants(txlst, vcf,
+PromoterVariants(upstream=100, downstream=10))
+colSums(assays(promoter)$counts)
+```
+
+
+
+```{r}
+
+vcf_master <- dplyr::rename(vcf_master, Chr = seqnames)
+```
+
+```{r}
+vcf_master_plots <- vcf_master %>% drop_na(ID_)
+vcf_master_plots <- vcf_master %>% drop_na(CADD_SCALED)
+vcf_master_plots <- vcf_master %>% drop_na(EXAC_AF)
+vcf_master_plots <- vcf_master %>% drop_na(Chr)
+
+
+
+# transform CADD_SCALED column to be numeric data
+vcf_master_plots <- transform(vcf_master_plots, CADD_SCALED = as.numeric(CADD_SCALED))
+vcf_master_plots <- transform(vcf_master_plots, EXAC_AF = as.numeric(EXAC_AF))
+
+vcf_master_plots <- transform(vcf_master_plots, ID_ = as.character(ID_))
+```
+
+```{r}
+vcf_master_plots
+```
+
+
+
+
+```{r}
+vcf_master_plots_CADD <- vcf_master_plots %>% drop_na(CADD_SCALED)
+vcf_master_plots_CADD
+```
+
+ifelse(x > median(x),"up","down"))
+
+```{r}
+vcf_master_plots$Other <- ifelse(is.na(vcf_master_plots$CADD_SCALED), "Other", "Has CADD Score")
+```
+
+data[data$x1 != 2 & data$x2 != "e", ] 
+
+```{r}
+vcf_master_plots$Other
+```
+
+
+
+```{r}
+vcf_master_plots_CADD_Others <- vcf_master_plots[vcf_master_plots$Other != "Has CADD Score", ]
+vcf_master_plots_CADD_Others
+```
+
+```{r}
+library(stringr)
+vcf_master_plots_CADD_Others$CADD_SCALED_SCORE <- str_extract(vcf_master_plots_CADD_Others$CADD_Relevance, '(?i) (?<=score of\\D)\\d+')
+
+vcf_master_plots_CADD_Others
+```
+
+
+
+```{r}
+
+final_CADD_df <- dplyr::bind_rows(vcf_master_plots, vcf_master_plots_CADD_Others)
+```
+
+```{r}
+final_CADD_df
+```
 
