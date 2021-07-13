@@ -608,10 +608,170 @@ vcf_master_plots_CADD_Others$CADD_SCALED_SCORE <- str_extract(vcf_master_plots_C
 vcf_master_plots_CADD_Others
 ```
 
+```{r}
+vcf_CADD <- vcf_master
+```
+
+
+```{r}
+library(stringr)
+vcf_master$CADD_Extract <- str_extract(vcf_master$CADD_Relevance, '(?i) (?<=score of\\D)\\d+')
+
+vcf_master$CADD_Extract
+```
+
+
+```{r}
+vcf_master <- transform(vcf_master, CADD_Extract = as.numeric(CADD_Extract))
+vcf_master <- transform(vcf_master, CADD_SCALED = as.numeric(CADD_SCALED))
+```
+
+
+#THIS GOT IT WORKING HOW ARE YE. 
+
+```{r}
+vcf_master
+```
+
+```{r}
+vcf_master$CADD_FINAL <- ifelse(is.na(vcf_master$CADD_Extract), vcf_master$CADD_SCALED, vcf_master$CADD_Extract)
+```
+
+```{r}
+vcf_master$
+```
+
+
+
+
+
+
+
 
 ```{r}
 vcf_master_plots_CADD_Others
 ```
+
+
+
+
+```{r}
+myDF1 <- structure(list(studyno = c("J1000/8", "J1000/9", "J1000/9",
+"J1000/9",
+"J1000/5", "J1000/6"), date = structure(c(17123, 17127, 17135,
+17144, 17148, 17155), class = "Date"), pf_mcl = c(1:6
+), year = c(2016, 2016, 2016, 2016, 2016, 2016)), .Names = c("studyno",
+"date", "pf_mcl", "year"), row.names = c(NA, 6L), class = "data.frame")
+
+myDF2 <- structure(list(studyno = c("J740/4", "J1000/9", "J895/7", "J931/6",
+"J609/1", "J941/3"), pf_mcl = c(0L, 0L, 0L, 0L, 0L, 0L)), .Names =
+c("studyno",
+"pf_mcl"), row.names = c(NA, 6L), class = "data.frame")
+
+#Rui's proposal gives the following result
+# studyno       date year pf_mcl
+# 1 J1000/9 2016-11-22 2016      0
+# 2 J1000/9 2016-11-30 2016      0
+# 3 J1000/9 2016-12-09 2016      0
+
+
+library(dplyr)
+
+myDF1$studyno <- as.character(myDF1$studyno)
+myDF2$studyno <- as.character(myDF2$studyno)
+myDF3 <- merge(myDF1, myDF2, by="studyno", all.x=TRUE ) %>%
+                dplyr::mutate( pf_mcl = ifelse( is.na(pf_mcl.y), pf_mcl.x, pf_mcl.y ) ) %>%
+                dplyr::select( studyno, date, pf_mcl )
+```
+
+
+genes <- dplyr::rename(genes, Chr = seqnames,
+
+```{r}
+vcf_master_plots <- dplyr::rename(vcf_master_plots, CADD__SCORE = CADD_SCALED)
+```
+
+```{r}
+vcf_master_plots_CADD_Others
+```
+
+myDF1$studyno <- as.character(myDF1$studyno)
+myDF2$studyno <- as.character(myDF2$studyno)
+myDF3 <- merge(myDF1, myDF2, by="studyno", all.x=TRUE ) %>%
+                dplyr::mutate( pf_mcl = ifelse( is.na(pf_mcl.y), pf_mcl.x, pf_mcl.y ) ) %>%
+                dplyr::select( studyno, date, pf_mcl )
+                
+                
+```{r}
+vcf_master_plots_CADD_Others
+```
+
+
+
+```{r}
+vcf_master_plots$CADD__SCORE <- as.numeric(vcf_master_plots$CADD__SCORE)
+vcf_master_plots_CADD_Others$CADD__SCORE <- as.numeric(vcf_master_plots_CADD_Others$CADD__SCORE)
+
+vcf_combined_CADD <- merge(vcf_master_plots, vcf_master_plots_CADD_Others, by="CADD__SCORE", all.x = TRUE, all.y = FALSE)
+  
+```
+
+vcf_master_plots <- transform(vcf_master_plots, CADD__SCORE = as.numeric(CADD__SCORE))
+
+```{r}
+vcf_master_plots <- transform(vcf_master_plots, CADD__SCORE = as.factor(CADD__SCORE))
+vcf_master_plots_CADD_Others <- transform(vcf_master_plots_CADD_Others, CADD__SCORE = as.factor(CADD__SCORE))
+```
+
+```{r}
+vcf_master_plots_CADD_Others
+```
+
+
+```{r}
+vcf_combined_CADD
+```
+
+levels(new_dataset1$Chr_ALL) <- c("1", "2","3","4","5","6","7","8","9","10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X")
+
+```{r}
+vcf_combined_CADD <- transform(vcf_combined_CADD, Chr = as.character(Chr))
+vcf_combined_CADD <- vcf_combined_CADD %>% arrange(match(Chr, c("1", "2","3","4","5","6","7","8","9","10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X")))
+vcf_combined_CADD
+```
+
+
+
+
+
+
+
+
+
+```{r}
+
+myDF1
+```
+```{r}
+myDF2
+```
+
+```{r}
+myDF3
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r}
 new_dataset <- vcf_master_plots %>% dplyr::select(c(ID_, Chr, Status, CADD_SCALED, Consequence, EXAC_AF))
@@ -633,7 +793,7 @@ vcf_master_plots_CADD_Others <- dplyr::rename(vcf_master_plots_CADD_Others,
                                               ID_Other = ID_,
                                               Chr_Other = Chr,
                                               Status_Other = Status,
-                                              CADD_SCALED_OTHER = CADD_SCALED_SCORE,
+                                              CADD__SCORE = CADD_SCALED_SCORE,
                                               Consequence_Other = Consequence,
                                               EXAC_AF_Other = EXAC_AF)
 ```
@@ -650,6 +810,20 @@ new_dataset <- dplyr::bind_rows(vcf_master_plots_CADD_Others, vcf_master_plots)
 ```{r}
 new_dataset <- transform(new_dataset, CADD_SCALED_OTHER = as.numeric(CADD_SCALED_OTHER))
 ```
+
+He did:
+
+d1 %>% unite(univar,f1,f2) %>% spread(univar,val)
+
+Hadley saying:
+
+d1 %>% mutate(univar = f1:f2, f1 = NULL, f2 = NULL) %>% spread(univar,val)
+
+
+
+
+
+
 
 ```{r}
 new_dataset <- new_dataset %>% unite("CADD_ALL", CADD_SCALED_OTHER, CADD_SCALED)

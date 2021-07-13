@@ -96,6 +96,7 @@ vcf_master$Allele <- gsub("[^A-Za-z0-9]", "", vcf_master$Allele)
 vcf_master <- vcf_master %>% rownames_to_column(var = "ID_")
 
 # Make the ID 'NA' if it starts with a number, (we want the variants starting with "rs.....")
+
 is.na(vcf_master$ID_) <- 
   startsWith(vcf_master$ID_, "1") |
   startsWith(vcf_master$ID_, "2") |
@@ -124,26 +125,36 @@ is.na(vcf_master$ID_) <-
 #Rename seqnames
 vcf_master <- dplyr::rename(vcf_master, Chr = seqnames)
 
-#Remove all the NAs from the ID_ column.. leaving just those with valid accession number
+##N.B. 
 
+# With some of the variants in the file, the CADD score is not under the relevant
+#'CADD SCALED Score' column.. therefore it requires extracting from the 'CADD_Relevance'
+# Column which provides information on the variant.
 
+#This extraction is performed using the package (stringr) and the function str_extract
+#We are taking the numerical value after 'Score of' i.e. CADD score of.
+
+vcf_master$CADD_Extract <- str_extract(vcf_master$CADD_Relevance, '(?i) (?<=score of\\D)\\d+')
+vcf_master <- transform(vcf_master, CADD_Extract = as.numeric(CADD_Extract))
+vcf_master$CADD_FINAL <- ifelse(is.na(vcf_master$CADD_Extract), vcf_master$CADD_SCALED, vcf_master$CADD_Extract)
+vcf_master <- transform(vcf_master, CADD_FINAL = as.numeric(CADD_FINAL))
 
 # transform CADD_SCALED column to be numeric data
-vcf_master_plots <- transform(vcf_master_plots, CADD_SCALED = as.numeric(CADD_SCALED))
-vcf_master_plots <- transform(vcf_master_plots, EXAC_AF = as.numeric(EXAC_AF))
-vcf_master_plots <- transform(vcf_master_plots, ID_ = as.character(ID_))
+vcf_master <- transform(vcf_master, CADD_FINAL = as.numeric(CADD_FINAL))
+vcf_master <- transform(vcf_master, EXAC_AF = as.numeric(EXAC_AF))
+vcf_master <- transform(vcf_master, ID_ = as.character(ID_))
 
 
 #Reorder the ID_ column to be rank in terms of CADD_SCALED score
-vcf_master_plots$ID_ <- reorder(vcf_master_plots$ID_, vcf_master_plots$CADD_SCALED)
+vcf_master$ID_ <- reorder(vcf_master$ID_, vcf_master$CADD_FINAL)
 
 
 #Log scale ExAC AF
-vcf_master_plots$EXAC_AF <- log(vcf_master_plots$EXAC_AF)
+vcf_master$EXAC_AF <- log(vcf_master$EXAC_AF)
 
 
 #Creating a gene dataframe for the genes table, selecting relevant columns
-genes <- vcf_master_plots %>% dplyr::select(c(Symbol, 
+genes <- vcf_master %>% dplyr::select(c(Symbol, 
                                  Gene, 
                                  Chr, 
                                  start, 
@@ -160,6 +171,11 @@ genes <- dplyr::rename(genes,
                        HGNC = Symbol,
                        MAF = EXAC_AF)
 
+
+#Rounding the CADD Scaled scores to be whole numbers
+
+vcf_master$CADD_FINAL <- round(as.numeric(vcf_master$CADD_FINAL), digits=0)
+
 #Substitute any "_" for blank ""
 genes$Consequence <- gsub("_", " ", genes$Consequence)
 #Substitute "&" for " and "
@@ -167,15 +183,14 @@ genes$Consequence <- gsub("&", " and ", genes$Consequence)
 
 #Rounding the CADD values to nearest whole number using gsub
 
-vcf_master_plots$CADD_SCALED <- round(as.numeric(vcf_master_plots$CADD_SCALED), digits=0)
-vcf_master_plots$Consequence <- gsub("_", " ", vcf_master_plots$Consequence)
-vcf_master_plots$Consequence <- gsub("&", " and ", vcf_master_plots$Consequence)
+vcf_master$Consequence <- gsub("_", " ", vcf_master$Consequence)
+vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
 
 
 #Now using gsub for Status column
 
-vcf_master_plots$Status <- gsub("SRR:", " ", vcf_master_plots$Status)
-vcf_master_plots$Status <- gsub("_", " ", vcf_master_plots$Status)
+vcf_master$Status <- gsub("SRR:", " ", vcf_master$Status)
+vcf_master$Status <- gsub("_", " ", vcf_master$Status)
 
 #Quality score dataframe
 
@@ -190,87 +205,11 @@ df_DP <- rename(df_DP, DP = `vcf_master$DP`)
 df_DP <- transform(df_DP, DP = as.numeric(DP))
 
 #Mapping Quality dataframe
+
 df_MQ<- as.data.frame(vcf_master$MQ)
 df_MQ <- rename(df_MQ, MQ = `vcf_master$MQ`)
 df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
 
-ID_plot_dataframe <- vcf_master
-ID_plot_dataframe <- as.data.frame(ID_plot_dataframe)
-ID_plot_dataframe <- transform(ID_plot_dataframe, ID_ = as.character(ID_))
-ID_plot_dataframe <- transform(ID_plot_dataframe, Chr = as.numeric(Chr))
-ID_plot_dataframe
-
-#Creating CADD and Status df to remove NA's from plots
-
-#With some of the variants in the file, the CADD score is not under the relevant
-#'CADD SCALED Score' column.. therefore it requires extracting from the 'CADD_Relevance'
-# Column which provides information on the variant.
-
-#This extraction is performed using the package (stringr) and the function str_extract
-#We are taking the numerical value after 'Score of' i.e. CADD score of.. 
-
-vcf_master_plots_CADD <- vcf_master_plots %>% drop_na(CADD_SCALED)
-vcf_master_plots$Other <- ifelse(is.na(vcf_master_plots$CADD_SCALED), "Other", "Has CADD Score")
-vcf_master_plots_CADD_Others <- vcf_master_plots[vcf_master_plots$Other != "Has CADD Score", ]
-vcf_master_plots_CADD_Others$CADD_SCALED_SCORE <- str_extract(vcf_master_plots_CADD_Others$CADD_Relevance, '(?i) (?<=score of\\D)\\d+')
-
-
-vcf_master_plots_Status <- vcf_master_plots %>% drop_na(ID_)
-
-
-
-new_dataset <- vcf_master_plots %>% dplyr::select(c(ID_, Chr, Status, CADD_SCALED, Consequence, EXAC_AF))
-vcf_master_plots_CADD_Others <- vcf_master_plots_CADD_Others %>% dplyr::select(c(ID_, Chr, Status, CADD_SCALED_SCORE, Consequence, EXAC_AF))
-
-vcf_master_plots_CADD_Others <- dplyr::rename(vcf_master_plots_CADD_Others,
-                                              ID_Other = ID_,
-                                              Chr_Other = Chr,
-                                              Status_Other = Status,
-                                              CADD_SCALED_OTHER = CADD_SCALED_SCORE,
-                                              Consequence_Other = Consequence,
-                                              EXAC_AF_Other = EXAC_AF)
-
-new_dataset <- dplyr::bind_rows(vcf_master_plots_CADD_Others, vcf_master_plots)
-
-
-new_dataset <- transform(new_dataset, CADD_SCALED_OTHER = as.numeric(CADD_SCALED_OTHER))
-new_dataset <- new_dataset %>% unite("CADD_ALL", CADD_SCALED_OTHER, CADD_SCALED)
-new_dataset <- new_dataset %>% unite("ID_ALL", ID_, ID_Other)
-new_dataset <- new_dataset %>% unite("EXAC_AF_ALL", EXAC_AF_Other, EXAC_AF)
-new_dataset <- new_dataset %>% unite("Consequence_ALL", Consequence_Other, Consequence)
-new_dataset <- new_dataset %>% unite("Status_ALL", Status, Status_Other)
-new_dataset <- new_dataset %>% unite("Chr_ALL", Chr_Other, Chr)
-
-
-new_dataset$CADD_ALL <- sub("_NA", " ", new_dataset$CADD_ALL)
-new_dataset$CADD_ALL <- sub("NA_", " ", new_dataset$CADD_ALL)
-new_dataset$ID_ALL <- sub("_NA", " ", new_dataset$ID_ALL)
-new_dataset$ID_ALL <- sub("NA_", " ", new_dataset$ID_ALL)
-new_dataset$EXAC_AF_ALL <- sub("_NA", " ", new_dataset$EXAC_AF_ALL)
-new_dataset$EXAC_AF_ALL <- sub("NA_", " ", new_dataset$EXAC_AF_ALL)
-new_dataset$Consequence_ALL <- sub("_NA", " ", new_dataset$Consequence_ALL)
-new_dataset$Consequence_ALL <- sub("NA_", " ", new_dataset$Consequence_ALL)
-new_dataset$Status_ALL <- sub("_NA", " ", new_dataset$Status_ALL)
-new_dataset$Status_ALL <- sub("NA_", " ", new_dataset$Status_ALL)
-new_dataset$Chr_ALL <- sub("_NA", " ", new_dataset$Chr_ALL)
-new_dataset$Chr_ALL <- sub("NA_", " ", new_dataset$Chr_ALL)
-
-new_dataset$Status_ALL <- gsub("SRR:", " ", new_dataset$Status_ALL)
-new_dataset$Status_ALL <- gsub("_", " ", new_dataset$Status_ALL)
-
-new_dataset <- transform(new_dataset, CADD_ALL = as.numeric(CADD_ALL))
-new_dataset <- transform(new_dataset, EXAC_AF_ALL = as.numeric(EXAC_AF_ALL))
-new_dataset <- new_dataset %>% drop_na(CADD_ALL)
-
-new_dataset <- transform(new_dataset, CADD_ALL = as.numeric(CADD_ALL))
-new_dataset <- transform(new_dataset, EXAC_AF_ALL = as.numeric(EXAC_AF_ALL))
-new_dataset <- transform(new_dataset, ID_ALL = as.character(ID_ALL))
-new_dataset <- transform(new_dataset, Consequence_ALL = as.character(Consequence_ALL))
-
-
-new_dataset1 <- transform(new_dataset, Chr_ALL = as.factor(Chr_ALL))
-chrOrder<-c(paste(1:22,sep=""),"X")
-new_dataset1 %>% arrange(match(Chr_ALL, c("1", "2","3","4","5","6","7","8","9","10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X")))
 
 
 ### Beginning of Shiny App
@@ -731,7 +670,7 @@ server <- function(input, output, session) {
   vcf_genes <- reactive({
     
     # filter clinical data based on gene symbol entered in searchbar
-    vcf_master_plots %>% filter(Symbol == input$searchvcf) 
+    vcf_master %>% filter(Symbol == input$searchvcf) 
     
   })
   
@@ -821,21 +760,17 @@ server <- function(input, output, session) {
   observeEvent(input$dimension,{
     output$plot2 <- renderPlotly({
       
-      cadd_id_plot <- ggplot(data = new_dataset, 
-                           aes(x=EXAC_AF_ALL, y = as.factor(CADD_ALL), fill = Consequence_ALL, ID = ID_ALL)) + 
+      cadd_id_plot <- ggplot(data = vcf_master, 
+                           aes(x=EXAC_AF, y = as.factor(CADD_FINAL), fill = Consequence, ID = ID_)) + 
         geom_point(size = 2) +
         ggtitle("CADD Score vs. Minor Allele Frequency") +
                            
-                           scale_x_discrete("Minor Allele Frequency: 10^X:") +
                            theme_minimal() +
                            theme(plot.margin=unit(c(1,1,1.5,1.2),"cm")) +
                            theme(
                              axis.line.y = element_blank(),
                              axis.ticks.y = element_blank(),
-                             axis.line.x = element_blank(),
-                             axis.ticks.x = element_blank(),
                              axis.text.x = element_text(),
-                             axis.title.x = element_blank(),
                              panel.grid.major.x =element_line(),
                              panel.grid.minor.x = element_blank(),
                              panel.grid.major.y = element_blank(),
@@ -850,7 +785,14 @@ server <- function(input, output, session) {
       cadd_id_plot <- cadd_id_plot + ylab("CADD Score") + 
         theme(axis.title.y = element_text(angle = 0)) +
         theme_bw() +
-        scale_y_discrete() +
+        scale_y_discrete(expand = c(0.025,0.025)) +
+        
+        scale_x_continuous(limits = c(-12.5, -2.5),
+                           expand = c(0,0),
+                           breaks = seq(-12.5,-2.5, by = 1),
+                           name = "Minor Allele Frequency: 10^X:") +
+        
+        
         xlab("Minor Allele Frequency: 10^X:") + 
         theme(plot.title = element_text(hjust = 0.5, face = "bold"))
         theme(axis.title.x = element_text(angle = 0))
@@ -870,7 +812,7 @@ server <- function(input, output, session) {
 
       output$plot3 <- renderPlotly({
         
-       ID_location_plot <- ggplot(new_dataset1, aes(x=ID_ALL, y = Chr_ALL, fill=Status_ALL, CADD = CADD_ALL, Consequence = Consequence_ALL)) + 
+       ID_location_plot <- ggplot(vcf_master, aes(x=ID_, y = Chr, fill=Status, CADD = CADD_FINAL, Consequence = Consequence)) + 
           coord_flip() +
           geom_point(size = 2) +
          ggtitle("Genomic location vs. Variant Status") +
@@ -889,7 +831,7 @@ server <- function(input, output, session) {
          theme(axis.text.y = element_blank()) +
          theme(axis.ticks.y = element_blank()) +
           
-          scale_x_discrete("Accession ID") +
+         scale_x_discrete("CADD Score") +
           scale_y_discrete("Genomic Location") +
          theme(plot.title = element_text(hjust = 0.5, face = "bold"))
          theme_bw() +
@@ -961,6 +903,7 @@ server <- function(input, output, session) {
         theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) 
       
       ggplotly(MQ_hist)
+      
     })
     
     output$genomic_plot <- DT::renderDataTable({
