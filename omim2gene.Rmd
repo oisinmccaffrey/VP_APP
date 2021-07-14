@@ -91,7 +91,7 @@ ens2symbol <- function(mat){
 library(biomaRt)
 mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))
 genes <- vcf_master$Gene
-G_list <- getBM(filters= "ensembl_gene_id", attributes= c("ensembl_gene_id","hgnc_symbol"),values=genes,mart= mart)
+G_list <- getBM(filters= "ensembl_gene_id", attributes= c("ensembl_gene_id","hgnc_symbol","mim_morbid_accession", "mim_morbid_description"),values=genes,mart= mart)
 ```
 
 
@@ -124,5 +124,29 @@ info <- getBM(attributes=c("ensembl_gene_id_version", "external_gene_name"),
 
 ```{r}
 info
+```
+
+
+
+DAVE TANG STUFF
+
+
+```{r}
+data <- read.table("omim_to_ensembl.tsv.gz", header=F, stringsAsFactors=F, sep="\t")
+```
+
+```{r}
+colnames(data) <- c('omim', 'type', 'entrez_gene_id', 'hgnc_symbol', 'ensembl_gene_id')
+```
+
+
+```{r}
+library("biomaRt")
+ensembl <- useMart("ensembl",dataset="hsapiens_gene_ensembl")
+filters <- listFilters(ensembl)
+ 
+#these are the filters we can use
+#to limit our biomaRt query
+head(filters)
 ```
 
