@@ -368,6 +368,20 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                        #(initial size and any resize if you make window bigger)
                        
                        tabItem("CADD",
+                               
+                               tags$head(
+                                 includeCSS("www/styles.css")
+                               ),
+                               
+                               div(id = "page-topright",
+                                   div(class = "source_link", 
+                                       style="float:right", 
+                                       a(href = "https://cadd.gs.washington.edu/", 
+                                         "More information on CADD", 
+                                         icon("robot"))),
+                                   br(),
+                               ),
+                               
                                fluidRow(
                                  tabPanel("CADD Plot",
                                           fluidPage(
@@ -399,6 +413,19 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                        #(initial size and any resize if you make window bigger)
                        
                        tabItem("Status",
+                               
+                               tags$head(
+                                 includeCSS("www/styles.css")
+                               ),
+                               
+                               div(id = "page-topright",
+                                   div(class = "source_link", 
+                                       style="float:right", 
+                                       a(href = "https://cadd.gs.washington.edu/", 
+                                         "More information on CADD", 
+                                         icon("robot"))),
+                                   br(),
+                               ),
                                fluidRow(
                                  tabPanel("Status",
                                           fluidPage(
@@ -424,10 +451,24 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                  ))),
                        
                        tabItem("table_gene",
+                               
+                               tags$head(
+                                 includeCSS("www/styles.css")
+                               ),
+                               
+                               div(id = "page-topright",
+                                   div(class = "source_link", 
+                                       style="float:right", 
+                                       a(href = "https://www.genecards.org/", 
+                                         "Search Gene on GeneCards", 
+                                         icon("dna"))),
+                                   br(),
+                                   br(),
+                               ),
+                               
                                fluidRow(
                                  box(
                                    title = "Genes Table",
-                                   closable = TRUE,
                                    width = 12,
                                    status = "warning",
                                    solidHeader = TRUE,
@@ -443,6 +484,20 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                        
                        
                        tabItem(
+                         
+                         tags$head(
+                           includeCSS("www/styles.css")
+                         ),
+                         
+                         div(id = "page-topright",
+                             div(class = "source_link", 
+                                 style="float:right", 
+                                 a(href = "https://www.genecards.org/", 
+                                   "Search Gene on GeneCards", 
+                                   icon("dna"))),
+                             br(),
+                             br(),
+                         ),
                          tabName = "download_gene",
                          box(
                            title = "Gene Overview",
@@ -531,6 +586,19 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                        
                        tabItem("Quality",
                                
+                               tags$head(
+                                 includeCSS("www/styles.css")
+                               ),
+                               
+                               div(id = "page-topright",
+                                   div(class = "source_link", 
+                                       style="float:right", 
+                                       a(href = "https://gatk.broadinstitute.org/hc/en-us", 
+                                         "More information on GATK", 
+                                         icon("info-circle"))),
+                                   br(),
+                               ),
+                               
                                fluidRow(
                                  tabPanel("Quality",
                                           fluidPage(
@@ -564,7 +632,6 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
           
                                                   p("QUAL = 20, there is a 1 % chance that there is no variant at the site"),
                                                   p("QUAL = 50, there is a 1 in 1e5 (0.00001%) chance that there is no variant at the site"),
-                                                  tags$a(href = "https://gatk.broadinstitute.org/hc/en-us", "GATK")  
                                                 ),
                                                 
                                                 
@@ -578,6 +645,19 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                        
                        
                        tabItem("DP",
+                               
+                               tags$head(
+                                 includeCSS("www/styles.css")
+                               ),
+                               
+                               div(id = "page-topright",
+                                   div(class = "source_link", 
+                                       style="float:right", 
+                                       a(href = "https://gatk.broadinstitute.org/hc/en-us", 
+                                         "More information on GATK", 
+                                         icon("info-circle"))),
+                                   br(),
+                               ),
                                
                                fluidRow(
                                  tabPanel("DP",
@@ -608,7 +688,6 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                                   which filter out reads of poor mapping quality."),
                                                   br(),
                                                   
-                                                  tags$a(href = "https://gatk.broadinstitute.org/hc/en-us", "GATK")  
                                                 ),
                                             
                                             br(),  br(),
@@ -619,6 +698,19 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                        
                        
                        tabItem("MQ",
+                               
+                               tags$head(
+                                 includeCSS("www/styles.css")
+                               ),
+                               
+                               div(id = "page-topright",
+                                   div(class = "source_link", 
+                                       style="float:right", 
+                                       a(href = "https://gatk.broadinstitute.org/hc/en-us", 
+                                         "More information on GATK", 
+                                         icon("info-circle"))),
+                                   br(),
+                               ),
                                fluidRow(
                                  tabPanel("MQ",
                                           fluidPage(
@@ -643,7 +735,6 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                                   the allele from the variant. "),
                                                 br(),
                                                 
-                                                tags$a(href = "https://gatk.broadinstitute.org/hc/en-us", "GATK")  
                                             ),
                                           ),
                                           plotlyOutput("MQ_hist_plot") %>% withSpinner(color = "red")

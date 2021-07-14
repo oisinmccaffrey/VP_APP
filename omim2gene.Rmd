@@ -32,3 +32,97 @@ grep("MEGF6",omim2gene$`Approved Gene Symbol (HGNC)`)
 grep("SRRM1",omim2gene$`Approved Gene Symbol (HGNC)`)
 ```
 	
+	
+
+	
+```{r}
+library(dplyr)
+```
+
+```{r}
+dplyr::rename
+```
+
+	
+```{r}
+omim2gene <- dplyr::rename(omim2gene,  HGNC = `Approved Gene Symbol (HGNC)`)
+```
+
+```{r}
+omim2gene <- omim2gene %>% drop_na(HGNC)
+```
+
+```{r}
+omim2gene
+```
+```{r}
+vcf_master
+```
+
+```{r}
+library(biomaRt)
+```
+
+
+
+```{r}
+ens2symbol <- function(mat){
+   if(all(grepl(pattern="^ENSG", rownames(mat)))){
+        mart = useMart(biomart = "ensembl", dataset = "hsapiens_gene_ensembl", archive=FALSE)
+        mat <- as.data.frame(mat)
+        mat$ensembl_gene_id_version <- rownames(mat)
+        info <- getBM(attributes=c("ensembl_gene_id","external_gene_name"),
+                      filters = c("ensembl_gene_id"),
+                      values = mat$ensembl_gene_id,
+                      mart = mart,
+                      useCache=FALSE)
+        tmp <- merge(mat, info, by="ensembl_gene_id")
+        tmp$external_gene_name <- make.names(tmp$external_gene_name, unique = T)
+        rownames(tmp) <- tmp$external_gene_name
+        tmp <- subset(tmp, select=-c(ensembl_gene_id, external_gene_name))
+        return(tmp)
+    }else{
+        return(mat)
+    }
+}
+```
+
+```{r}
+library(biomaRt)
+mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))
+genes <- vcf_master$Gene
+G_list <- getBM(filters= "ensembl_gene_id", attributes= c("ensembl_gene_id","hgnc_symbol"),values=genes,mart= mart)
+```
+
+
+```{r}
+G_list
+```
+
+
+```{r}
+library(biomaRt)
+## read in file with ENSEMBL Gene IDs (with version)
+## Realistically this vector will come from your VCF file 
+ens_file <- read.table("foo.txt")
+## set up the biomart "MART" object to query their database
+mart = useMart(biomart = "ensembl", dataset = "hsapiens_gene_ensembl", host="https://www.ensembl.org", archive=FALSE)
+## now use BM to query their database, save it to a dataframe 
+## attributes: what we want to pull from their DB 
+## I always include our key value (ensembl gene id version), so we can merge what we pull
+## back to our query. you will see this below. you can run listAttributes(mart) to see them all
+## filters: means it is using the values we supply via 'values' to filter the results of attributes
+## values: our input query 
+info <- getBM(attributes=c("ensembl_gene_id_version", "external_gene_name"),
+              filters=c("ensembl_gene_id_version"),
+              values=ens_file$V1,
+              mart=mart,
+              useCache=F)
+## look at info DF, only one query was returned. not sure why, maybe try stripping the version number and try again yourself, using "ensembl_gene_id" in place of "ensembl_gene_id_version"
+## but now you have your ENSG -> GENE ID in a 2 column dataframe you can use this to query / convert your ENSG IDs
+```
+
+```{r}
+info
+```
+
