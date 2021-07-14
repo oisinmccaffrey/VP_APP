@@ -651,6 +651,9 @@ vcf_master$
 ```{r}
 vcf_master_plots_CADD_Others
 ```
+```{r}
+vcf_master
+```
 
 
 
@@ -740,6 +743,17 @@ vcf_combined_CADD <- vcf_combined_CADD %>% arrange(match(Chr, c("1", "2","3","4"
 vcf_combined_CADD
 ```
 
+
+```{r}
+vcf_master
+```
+
+
+
+```{r}
+vcf_master_Status_plot <- vcf_master %>% drop_na(ID_)
+vcf_master_Status_plot
+```
 
 
 

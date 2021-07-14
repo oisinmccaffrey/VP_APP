@@ -1,0 +1,34 @@
+---
+title: "genemap2.rmd"
+output: html_document
+---
+
+```{r}
+library(vroom)
+```
+
+```{r}
+omim2gene <- vroom("mim2gene.txt")
+```
+
+```{r}
+omim2gene
+```
+
+
+
+
+
+
+```{r}
+omim2gene$`Approved Gene Symbol (HGNC)`
+```
+
+```{r}
+grep("MEGF6",omim2gene$`Approved Gene Symbol (HGNC)`)
+```
+	
+```{r}
+grep("SRRM1",omim2gene$`Approved Gene Symbol (HGNC)`)
+```
+	

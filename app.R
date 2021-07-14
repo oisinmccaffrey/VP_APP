@@ -192,6 +192,9 @@ vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
 vcf_master$Status <- gsub("SRR:", " ", vcf_master$Status)
 vcf_master$Status <- gsub("_", " ", vcf_master$Status)
 
+
+
+
 #Quality score dataframe
 
 df<- as.data.frame(vcf_master$QUAL)
