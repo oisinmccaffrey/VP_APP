@@ -227,6 +227,14 @@ df_MQ <- rename(df_MQ, MQ = `vcf_master$MQ`)
 df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
 
 
+#This javascript command is saying:
+#For the data shown in in the table (gene table), 
+#Create a hyperlink to OMIM site.. and add row[1] of 
+#Genes table (which is where the OMIM Id is)
+#And add this ID to the hyperlink..
+#i.e... https://omim.org/   +    612507
+
+
 render_OMIM_link <- c(
   "function(data, type, row){",
   "  if(type === 'display'){",
@@ -237,7 +245,6 @@ render_OMIM_link <- c(
   "  }",
   "}"
 )
-
 
 
 ### Beginning of Shiny App
@@ -1028,6 +1035,12 @@ server <- function(input, output, session) {
     
     output$genomic_plot <- DT::renderDataTable({
       
+      #Call the genes dataframe for the Gene Table..
+      #Also calling the 'render_OMIM_link' so that 
+      #We can perform hyperlink to OMIM webpage.. 
+      #Using the OMIM ID's for each variant
+      #Using javascript
+      
       datatable(genes, rownames = FALSE, 
       options = list(
         columnDefs = list(
@@ -1038,7 +1051,7 @@ server <- function(input, output, session) {
     })  
     
     
-    #For downloading HTML report, not working atm
+    #For downloading HTML report, not currently working
     output$report <- downloadHandler(
       # For PDF output, change this to "report.pdf"
       filename = "report.html",
