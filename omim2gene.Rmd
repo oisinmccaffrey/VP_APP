@@ -20,6 +20,7 @@ omim2gene
 
 
 
+
 ```{r}
 omim2gene$`Approved Gene Symbol (HGNC)`
 ```
@@ -148,5 +149,54 @@ filters <- listFilters(ensembl)
 #these are the filters we can use
 #to limit our biomaRt query
 head(filters)
+```
+
+
+
+
+
+
+
+
+Thursday July 15th.. 
+
+```{r}
+vcf_master_Berg
+```
+
+
+
+```{r}
+vcf_master_Berg <- vcf_master
+```
+
+genes <- dplyr::rename(genes, Chr = seqnames, From = REF, To = Allele, HGNC = Symbol)
+
+```{r}
+vcf_master_Berg <- dplyr::rename(vcf_master_Berg, HGNC = Symbol)
+```
+
+
+
+```{r}
+omim2gene
+```
+
+merge(table1, table2[, c("pid", "val2")], by="pid")
+
+```{r}
+vcf_master_OMIM_CODES <- merge(vcf_master_Berg, omim2gene[, c("HGNC", "MIM Number")], by="HGNC", all.x=TRUE)
+```
+
+```{r}
+vcf_master_OMIM_CODES$`MIM Number`
+```
+
+```{r}
+vcf_master_OMIM_CODES <- dplyr::rename(vcf_master_OMIM_CODES, OMIM = `MIM Number`)
+```
+
+```{r}
+vcf_master_OMIM_CODES
 ```
 

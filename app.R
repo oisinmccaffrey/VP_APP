@@ -3,6 +3,7 @@ library(plotly) # interactive ggplots..
 library(grid)
 library(rmarkdown)
 library(magrittr)
+library(vroom)
 library(Cairo)
 library(grDevices)
 library(ggplot2)
@@ -153,9 +154,22 @@ vcf_master$ID_ <- reorder(vcf_master$ID_, vcf_master$CADD_FINAL)
 vcf_master$EXAC_AF <- log(vcf_master$EXAC_AF)
 
 
+# OMIM STUFF
+
+omim2gene <- vroom("mim2gene.txt")
+omim2gene <- dplyr::rename(omim2gene,  HGNC = `Approved Gene Symbol (HGNC)`)
+omim2gene <- omim2gene %>% drop_na(HGNC)
+vcf_master_Berg <- vcf_master
+vcf_master_Berg <- dplyr::rename(vcf_master_Berg, HGNC = Symbol)
+vcf_master_OMIM_CODES <- merge(vcf_master_Berg, omim2gene[, c("HGNC", "MIM Number")], by="HGNC", all.x=TRUE)
+vcf_master_OMIM_CODES <- dplyr::rename(vcf_master_OMIM_CODES, OMIM = `MIM Number`)
+
+
+
 #Creating a gene dataframe for the genes table, selecting relevant columns
-genes <- vcf_master %>% dplyr::select(c(Symbol, 
-                                 Gene, 
+genes <- vcf_master_OMIM_CODES %>% dplyr::select(c(HGNC, 
+                                 OMIM,
+                                 Gene,
                                  Chr, 
                                  start, 
                                  REF, 
@@ -168,7 +182,6 @@ genes <- vcf_master %>% dplyr::select(c(Symbol,
 genes <- dplyr::rename(genes, 
                        From = REF, 
                        To = Allele, 
-                       HGNC = Symbol,
                        MAF = EXAC_AF)
 
 
@@ -212,6 +225,18 @@ df_DP <- transform(df_DP, DP = as.numeric(DP))
 df_MQ<- as.data.frame(vcf_master$MQ)
 df_MQ <- rename(df_MQ, MQ = `vcf_master$MQ`)
 df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
+
+
+render_OMIM_link <- c(
+  "function(data, type, row){",
+  "  if(type === 'display'){",
+  "    var a = '<a href=\"https://omim.org/' + row[1] + '\">' + data + '</a>';",
+  "    return a;",
+  "  } else {",
+  "    return data;",
+  "  }",
+  "}"
+)
 
 
 
@@ -465,6 +490,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                    br(),
                                    br(),
                                ),
+                            
                                
                                fluidRow(
                                  box(
@@ -1001,9 +1027,15 @@ server <- function(input, output, session) {
     })
     
     output$genomic_plot <- DT::renderDataTable({
-      genes
       
-    })   
+      datatable(genes, rownames = FALSE, 
+      options = list(
+        columnDefs = list(
+          list(targets = 1, render = JS(render_OMIM_link)),
+          list(targets = "_all", className = "dt-center"))))
+    
+      
+    })  
     
     
     #For downloading HTML report, not working atm
