@@ -266,6 +266,17 @@ render_OMIM_link <- c(
   "    return data;",
   "  }",
   "}"
+)  
+  
+  render_GeneCards_link <- c(
+    "function(data, type, row){",
+    "  if(type === 'display'){",
+    "    var a = '<a href=\"https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + row[0] + '\">' + data + '</a>';",
+    "    return a;",
+    "  } else {",
+    "    return data;",
+    "  }",
+    "}"
 )
 
 
@@ -1119,7 +1130,11 @@ server <- function(input, output, session) {
       #Using the OMIM ID's for each variant
       #Using javascript
       
-      Genes_Panel
+      datatable(Genes_Panel, rownames = FALSE, 
+                options = list(
+                  columnDefs = list(
+                    list(targets = 0, render = JS(render_GeneCards_link)),
+                    list(targets = "_all", className = "dt-center"))))
       
       
     })  
