@@ -292,7 +292,7 @@ hello <- read.delim("9_Allergy_Immunology_Infectious.vcf")
 
 
 ```{r}
-panels <- read.delim("PANELS")
+panels <- read.delim("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/PANELS/PANELS.vcf")
 ```
 
 ```{r}
@@ -319,10 +319,24 @@ vcf_master_OMIM_AND_MORBID <- merge(vcf_master_OMIM_CODES, morbidmap[, c("OMIM",
 ```{r}
 vcf_master_OMIM_AND_PHENO
 ```
+```{r}
+panels
+```
+
+
+```{r}
+vcf_master_OMIM_AND_PHENO <- vcf_master_OMIM_AND_PHENO[order(vcf_master_OMIM_AND_PHENO$HGNC),]
+```
 
 
 ```{r}
 PHENOTYPES_WithMaster <- merge(vcf_master_OMIM_AND_PHENO, panels[, c("HGNC", "Panel")], by="HGNC", all.x=TRUE)
 PHENOTYPES_WithMaster 
+```
+```{r}
+PHENOTYPES_WithMaster
+```
+```{r}
+vcf_master_OMIM_AND_PHENO
 ```
 
