@@ -178,7 +178,12 @@ unique(panels) -> panels
 PHENOTYPES_WithMaster <- merge(vcf_master_OMIM_AND_PHENO, panels[, c("HGNC", "Panel")], by="HGNC", all.x=TRUE)
 
 
-Genes_Panel <- PHENOTYPES_WithMaster %>% dyplr::select(c(HGNC,OMIM, Gene, Consequence, Panel))
+Genes_Panel <- PHENOTYPES_WithMaster %>% dplyr::select(c(HGNC, Chr, Panel, start, REF, Allele, Consequence))
+Genes_Panel <- dplyr::rename(Genes_Panel, 
+                       From = REF, 
+                       To = Allele)
+Genes_Panel <- Genes_Panel %>% drop_na(Panel)
+Genes_Panel <- Genes_Panel[order(Genes_Panel$Chr),]
 
 
 #Creating a gene dataframe for the genes table, selecting relevant columns
@@ -198,6 +203,8 @@ genes <- dplyr::rename(genes,
                        From = REF, 
                        To = Allele, 
                        MAF = EXAC_AF)
+
+genes <- genes[order(genes$Chr),]
 
 
 #Rounding the CADD Scaled scores to be whole numbers
@@ -304,6 +311,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                          icon = icon("dna"),
                          startExpanded = TRUE,
                          menuSubItem("Gene Table", tabName = "table_gene"),
+                         menuSubItem("Gene Panel", tabName = "panel_gene"),
                          menuSubItem("Gene Overview", tabName = "download_gene")),
                        
                        menuItem(
@@ -520,7 +528,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                
                                fluidRow(
                                  box(
-                                   title = "Genes Table",
+                                   title = "Genes Panel",
                                    width = 12,
                                    status = "warning",
                                    solidHeader = TRUE,
@@ -533,6 +541,40 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                    tabPanel("Genes",
                                             status = "success",
                                             dataTableOutput("genomic_plot") %>% withSpinner(color = "red"))))),
+                       
+                       
+                       tabItem("panel_gene",
+                               
+                               tags$head(
+                                 includeCSS("www/styles.css")
+                               ),
+                               
+                               div(id = "page-topright",
+                                   div(class = "source_link", 
+                                       style="float:right", 
+                                       a(href = "https://www.genecards.org/", 
+                                         "Search Gene on GeneCards", 
+                                         icon("dna"))),
+                                   br(),
+                                   br(),
+                               ),
+                               
+                               
+                               fluidRow(
+                                 box(
+                                   title = "Genes Panel",
+                                   width = 12,
+                                   status = "warning",
+                                   solidHeader = TRUE,
+                                   collapsible = TRUE,
+                                   label = boxLabel(
+                                     text = 4,
+                                     status = "danger",
+                                     style = "circle"
+                                   ),
+                                   tabPanel("Genes",
+                                            status = "success",
+                                            dataTableOutput("panel_table") %>% withSpinner(color = "red"))))),
                        
                        
                        tabItem(
@@ -1066,6 +1108,19 @@ server <- function(input, output, session) {
           list(targets = 1, render = JS(render_OMIM_link)),
           list(targets = "_all", className = "dt-center"))))
     
+      
+    })  
+    
+    output$panel_table <- DT::renderDataTable({
+      
+      #Call the genes dataframe for the Gene Table..
+      #Also calling the 'render_OMIM_link' so that 
+      #We can perform hyperlink to OMIM webpage.. 
+      #Using the OMIM ID's for each variant
+      #Using javascript
+      
+      Genes_Panel
+      
       
     })  
     
