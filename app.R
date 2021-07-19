@@ -154,7 +154,7 @@ vcf_master$ID_ <- reorder(vcf_master$ID_, vcf_master$CADD_FINAL)
 vcf_master$EXAC_AF <- log(vcf_master$EXAC_AF)
 
 
-# OMIM STUFF
+# LINK TO OMIM
 
 omim2gene <- vroom("mim2gene.txt")
 omim2gene <- dplyr::rename(omim2gene,  HGNC = `Approved Gene Symbol (HGNC)`)
@@ -164,6 +164,21 @@ vcf_master_Berg <- dplyr::rename(vcf_master_Berg, HGNC = Symbol)
 vcf_master_OMIM_CODES <- merge(vcf_master_Berg, omim2gene[, c("HGNC", "MIM Number")], by="HGNC", all.x=TRUE)
 vcf_master_OMIM_CODES <- dplyr::rename(vcf_master_OMIM_CODES, OMIM = `MIM Number`)
 
+
+
+genemap2 <- vroom("genemap2.txt")
+genemap2 <- dplyr::rename(genemap2, OMIM = `MIM Number`)
+genemap2 <- genemap2 %>% drop_na(OMIM)
+genemap2 <- genemap2 %>% drop_na(Phenotypes)
+vcf_master_OMIM_AND_PHENO <- merge(vcf_master_OMIM_CODES, genemap2[, c("OMIM", "Phenotypes")], by="OMIM", all.x=TRUE)
+
+
+panels <- read.delim("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/PANELS/PANELS.vcf")
+unique(panels) -> panels
+PHENOTYPES_WithMaster <- merge(vcf_master_OMIM_AND_PHENO, panels[, c("HGNC", "Panel")], by="HGNC", all.x=TRUE)
+
+
+Genes_Panel <- PHENOTYPES_WithMaster %>% dyplr::select(c(HGNC,OMIM, Gene, Consequence, Panel))
 
 
 #Creating a gene dataframe for the genes table, selecting relevant columns
@@ -245,6 +260,10 @@ render_OMIM_link <- c(
   "  }",
   "}"
 )
+
+
+
+
 
 
 ### Beginning of Shiny App
