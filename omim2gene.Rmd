@@ -200,3 +200,129 @@ vcf_master_OMIM_CODES <- dplyr::rename(vcf_master_OMIM_CODES, OMIM = `MIM Number
 vcf_master_OMIM_CODES
 ```
 
+```{r}
+genemap2 <- vroom("genemap2.txt")
+```
+
+vcf_master_OMIM_CODES <- dplyr::rename(vcf_master_OMIM_CODES, OMIM = `MIM Number`)
+
+
+```{r}
+genemap2 <- dplyr::rename(genemap2, OMIM = `MIM Number`)
+```
+
+```{r}
+genemap2
+```
+vcf_master_OMIM_CODES <- merge(vcf_master_Berg, omim2gene[, c("HGNC", "MIM Number")], by="HGNC", all.x=TRUE)
+
+
+```{r}
+vcf_master_OMIM_CODES
+```
+omim2gene <- omim2gene %>% drop_na(HGNC)
+
+```{r}
+genemap2 <- genemap2 %>% drop_na(OMIM)
+genemap2 <- genemap2 %>% drop_na(Phenotypes)
+genemap2
+```
+
+
+```{r}
+vcf_master_OMIM_AND_PHENO <- merge(vcf_master_OMIM_CODES, genemap2[, c("OMIM", "Phenotypes")], by="OMIM", all.x=TRUE)
+```
+
+```{r}
+genemap2
+```
+
+
+
+
+
+```{r}
+vcf_master_OMIM_AND_PHENO
+```
+```{r}
+vcf_master_OMIM_CODES
+```
+
+
+
+#NOW TRYING WITH MORBID MAP..
+
+
+
+```{r}
+morbidmap <- vroom("morbidmap.txt")
+```
+```{r}
+morbidmap
+```
+
+genemap2 <- dplyr::rename(genemap2, OMIM = `MIM Number`)
+
+```{r}
+morbidmap <- dplyr::rename(morbidmap, OMIM = `MIM Number`)
+```
+
+```{r}
+morbidmap <- morbidmap %>% drop_na(OMIM)
+morbidmap <- morbidmap %>% drop_na(Phenotype)
+morbidmap
+```
+vcf_master_OMIM_AND_PHENO <- merge(vcf_master_OMIM_CODES, genemap2[, c("OMIM", "Phenotypes")], by="OMIM", all.x=TRUE)
+
+```{r}
+vcf_master_OMIM_AND_MORBID <- merge(vcf_master_OMIM_CODES, morbidmap[, c("OMIM", "Phenotype")], by="OMIM", all.x=TRUE)
+```
+
+```{r}
+vcf_master_OMIM_AND_PHENO
+```
+
+```{r}
+unique(vcf_master_OMIM_AND_MORBID)
+```
+
+```{r}
+hello <- read.delim("9_Allergy_Immunology_Infectious.vcf")
+```
+
+
+```{r}
+panels <- read.delim("PANELS")
+```
+
+```{r}
+unique(panels) -> panels
+```
+
+```{r}
+panels
+```
+
+
+
+
+```{r}
+hello <- unique(hello)
+```
+
+
+
+
+vcf_master_OMIM_AND_MORBID <- merge(vcf_master_OMIM_CODES, morbidmap[, c("OMIM", "Phenotype")], by="OMIM", all.x=TRUE)
+
+
+```{r}
+vcf_master_OMIM_AND_PHENO
+```
+
+
+```{r}
+PHENOTYPES_WithMaster <- merge(vcf_master_OMIM_AND_PHENO, panels[, c("HGNC", "Panel")], by="HGNC", all.x=TRUE)
+PHENOTYPES_WithMaster 
+```
+
