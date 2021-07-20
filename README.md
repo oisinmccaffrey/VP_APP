@@ -19,3 +19,12 @@
    As there is a veritable need for improvements to current variant prioritisation and visualisation methods, 
    this project will provide substantial positive progress to the movement 
    for improved sequence variant annotation and prioritisation from NGS projects.</p>
+
+
+
+<img
+src=“APP_screenshot.png”
+raw=true
+alt=“APP Screenshot”
+style=“margin-right: 10px;”
+/>
