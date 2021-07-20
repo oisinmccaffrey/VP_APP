@@ -132,8 +132,8 @@ vcf_master <- dplyr::rename(vcf_master, Chr = seqnames)
 #'CADD SCALED Score' column.. therefore it requires extracting from the 'CADD_Relevance'
 # Column which provides information on the variant.
 
-#This extraction is performed using the package (stringr) and the function str_extract
-#We are taking the numerical value after 'Score of' i.e. CADD score of.
+# This extraction is performed using the package (stringr) and the function str_extract
+ #We are taking the numerical value after 'Score of' i.e. CADD score of.
 
 vcf_master$CADD_Extract <- str_extract(vcf_master$CADD_Relevance, '(?i) (?<=score of\\D)\\d+')
 vcf_master <- transform(vcf_master, CADD_Extract = as.numeric(CADD_Extract))
@@ -184,6 +184,14 @@ Genes_Panel <- dplyr::rename(Genes_Panel,
                        To = Allele)
 Genes_Panel <- Genes_Panel %>% drop_na(Panel)
 Genes_Panel <- Genes_Panel[order(Genes_Panel$Chr),]
+
+Genes_Panel$Consequence <- gsub("_", " ", Genes_Panel$Consequence)
+#Substitute "&" for " and "
+Genes_Panel$Consequence <- gsub("&", " and ", Genes_Panel$Consequence)
+
+Genes_Panel$Panel <- gsub("_", " ", Genes_Panel$Panel)
+#Substitute "&" for " and "
+Genes_Panel$Panel <- gsub("&", " and ", Genes_Panel$Panel)
 
 
 #Creating a gene dataframe for the genes table, selecting relevant columns
