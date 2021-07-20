@@ -20,6 +20,11 @@
    this project will provide substantial positive progress to the movement 
    for improved sequence variant annotation and prioritisation from NGS projects.</p>
 
+br(),
+br(),
 
+<h2 id="Pathogenicity">Pathogenicity</h2>
+
+<h3 id="CADD Score vs. Minor Allele Frequency">CADD Score vs. Minor Allele Frequency</h2>
 
 ![](images/APP_screenshot.png)
