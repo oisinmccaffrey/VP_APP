@@ -31,5 +31,14 @@
 
 ![](images/Status_Plot.png)
 
+<h3 id="Genes Table">Genes Table</h3>
 
+![](images/Genes_Table.png)
 
+<h3 id="Genes Panel">Genes Panel</h3>
+
+![](images/Genes_Panel.png)
+
+<h3 id="Gene Overview">Gene Overview</h3>
+
+![](images/Gene_Overview.png)
