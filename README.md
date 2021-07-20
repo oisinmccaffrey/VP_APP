@@ -22,9 +22,4 @@
 
 
 
-<img
-src=“images/APP_screenshot.png”
-raw=true
-alt=“APP Screenshot”
-style=“margin-right: 10px;”
-/>
+![](images/APP_screenshot.png)
