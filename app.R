@@ -433,6 +433,8 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                    tags$a(href = "https://www.internationalgenome.org/data-portal/sample", 
                                           "IGSR Data"),
                                    tags$br(),tags$br(),
+                                   tags$img(src = "images/Workflow.png", width = "1000px", height = "200px"),
+                                   br(),
                                    tags$img(src = "images/nuig_logo.png", width = "150px", height = "75px")
                                ),
                                
