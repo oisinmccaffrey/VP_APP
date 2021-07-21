@@ -161,24 +161,51 @@ omim2gene <- dplyr::rename(omim2gene,  HGNC = `Approved Gene Symbol (HGNC)`)
 omim2gene <- omim2gene %>% drop_na(HGNC)
 vcf_master_Berg <- vcf_master
 vcf_master_Berg <- dplyr::rename(vcf_master_Berg, HGNC = Symbol)
-vcf_master_OMIM_CODES <- merge(vcf_master_Berg, omim2gene[, c("HGNC", "MIM Number")], by="HGNC", all.x=TRUE)
+vcf_master_OMIM_CODES <- merge(vcf_master_Berg, 
+                               omim2gene[, c("HGNC", "MIM Number")], 
+                               by="HGNC", 
+                               all.x=TRUE)
 vcf_master_OMIM_CODES <- dplyr::rename(vcf_master_OMIM_CODES, OMIM = `MIM Number`)
 
-
+#Linking to Gene Panels
 
 genemap2 <- vroom("genemap2.txt")
 genemap2 <- dplyr::rename(genemap2, OMIM = `MIM Number`)
 genemap2 <- genemap2 %>% drop_na(OMIM)
 genemap2 <- genemap2 %>% drop_na(Phenotypes)
-vcf_master_OMIM_AND_PHENO <- merge(vcf_master_OMIM_CODES, genemap2[, c("OMIM", "Phenotypes")], by="OMIM", all.x=TRUE)
+vcf_master_OMIM_AND_PHENO <- merge(vcf_master_OMIM_CODES, 
+                                   genemap2[, c("OMIM", "Phenotypes")], 
+                                   by="OMIM", 
+                                   all.x=TRUE)
 
+
+# Reading in the "Panels" vcf.. containing 30000 rows of genes 
+# And the relevant gene panel for each 
+# e.g
+
+# HGNC	 Panel
+
+# GLDC	 Biochemical
+# FGFR2  Audiologic_Otolaryngologic
+# DSP	   Cardiovascular
 
 panels <- read.delim("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/PANELS/PANELS.vcf")
 unique(panels) -> panels
-PHENOTYPES_WithMaster <- merge(vcf_master_OMIM_AND_PHENO, panels[, c("HGNC", "Panel")], by="HGNC", all.x=TRUE)
+PHENOTYPES_WithMaster <- merge(vcf_master_OMIM_AND_PHENO, 
+                               panels[, c("HGNC", "Panel")], 
+                               by="HGNC", 
+                               all.x=TRUE)
 
+#Creating a Gene Panel dataframe to call below as a table.
 
-Genes_Panel <- PHENOTYPES_WithMaster %>% dplyr::select(c(HGNC, Chr, Panel, start, REF, Allele, Consequence))
+Genes_Panel <- PHENOTYPES_WithMaster %>% dplyr::select(c(HGNC, 
+                                                         Chr, 
+                                                         Panel, 
+                                                         start, 
+                                                         REF, 
+                                                         Allele, 
+                                                         Consequence))
+
 Genes_Panel <- dplyr::rename(Genes_Panel, 
                        From = REF, 
                        To = Allele)
@@ -186,7 +213,9 @@ Genes_Panel <- Genes_Panel %>% drop_na(Panel)
 Genes_Panel <- Genes_Panel[order(Genes_Panel$Chr),]
 
 Genes_Panel$Consequence <- gsub("_", " ", Genes_Panel$Consequence)
+
 #Substitute "&" for " and "
+
 Genes_Panel$Consequence <- gsub("&", " and ", Genes_Panel$Consequence)
 
 Genes_Panel$Panel <- gsub("_", " ", Genes_Panel$Panel)
@@ -257,12 +286,12 @@ df_MQ <- rename(df_MQ, MQ = `vcf_master$MQ`)
 df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
 
 
-#This javascript command is saying:
-#For the data shown in in the table (gene table), 
-#Create a hyperlink to OMIM site.. and add row[1] of 
-#Genes table (which is where the OMIM Id is)
-#And add this ID to the hyperlink..
-#i.e... https://omim.org/   +    612507
+# This javascript command is saying:
+# For the data shown in in the table (gene table), 
+# Create a hyperlink to OMIM site.. and add row[1] of 
+# Genes table (which is where the OMIM Id is)
+# And add this ID to the hyperlink..
+# i.e... https://omim.org/   +    612507
 
 
 render_OMIM_link <- c(
@@ -286,7 +315,6 @@ render_OMIM_link <- c(
     "  }",
     "}"
 )
-
 
 
 
@@ -378,6 +406,8 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                  includeCSS("www/styles.css")
                                ),
                                
+                               #Creating interactive link to Github
+                               
                                div(id = "page-topright",
                                    div(class = "source_link", 
                                        style="float:right", 
@@ -433,7 +463,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                    tags$a(href = "https://www.internationalgenome.org/data-portal/sample", 
                                           "IGSR Data"),
                                    tags$br(),tags$br(),
-                                   tags$img(src = "images/Workflow.png", width = "1000px", height = "200px"),
+                                   tags$img(src = "images/Workflow.png", width = "1000px", height = "150px"),
                                    br(),
                                    tags$img(src = "images/nuig_logo.png", width = "150px", height = "75px")
                                ),
@@ -453,6 +483,8 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                  includeCSS("www/styles.css")
                                ),
                                
+                               #Creating interacrive link to CADD website
+                               
                                div(id = "page-topright",
                                    div(class = "source_link", 
                                        style="float:right", 
@@ -461,6 +493,13 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                          icon("robot"))),
                                    br(),
                                ),
+                               
+                               # This javascript code results in the CADD plot changing 
+                               # size depending on how large your browser window is
+                               # Changes dimension depending on window size.
+                               
+                               # Use Javascript to detect the browser window size 
+                               # (initial size and any resize if you make window bigger)
                                
                                fluidRow(
                                  tabPanel("CADD Plot",
@@ -489,8 +528,6 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                           )
                                  ))),
                        
-                       #Use Javascript to detect the browser window size 
-                       #(initial size and any resize if you make window bigger)
                        
                        tabItem("Status",
                                
@@ -959,12 +996,14 @@ server <- function(input, output, session) {
     
   })
   
+  
   # Creating interactive plot for CADD vs MAF for each variant
   # The user can filter the interactive plot by the type of variant 
   # e.g. missense/stop gain. Moreover, one can hover over individual points 
   # (variants) to attain the relevant ExAC minor allele frequency, CADD score,  
   # Consequence  (e.g.  missense  variant)  and  
   # SNP ID (e.g. rs200203535) for each variant 
+  
   
   observeEvent(input$dimension,{
     output$plot2 <- renderPlotly({
@@ -1017,7 +1056,8 @@ server <- function(input, output, session) {
     
     
     # Creating interactive plot for the 'Status' of each variant
-    # Informs us on the types of variants on each chromosome in the file.
+    # Informs us on the types of variants on each chromosome in the file, 
+    # Ordered in terms of CADD score on each chromosome.
 
       output$plot3 <- renderPlotly({
         
@@ -1079,7 +1119,9 @@ server <- function(input, output, session) {
       
       ggplotly(qual_plot)
       
+      
     })
+    
     
     output$dp_hist_plot <- renderPlotly({
       
@@ -1095,7 +1137,9 @@ server <- function(input, output, session) {
       
       ggplotly(dp_hist)
       
+      
     })
+    
     
     output$MQ_hist_plot <- renderPlotly({
       
@@ -1113,7 +1157,9 @@ server <- function(input, output, session) {
       
       ggplotly(MQ_hist)
       
+      
     })
+    
     
     output$genomic_plot <- DT::renderDataTable({
       
