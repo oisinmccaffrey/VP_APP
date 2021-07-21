@@ -20,6 +20,9 @@
    this project will provide substantial positive progress to the movement 
    for improved sequence variant annotation and prioritisation from NGS projects.</p>
 
+<h2 id="Project Workflow">Project Workflow</h2>
+
+![](images/Workflow.png)
 
 <h2 id="Pathogenicity">Pathogenicity</h2>
 
@@ -30,6 +33,8 @@
 <h3 id="Variant Status">Variant Status</h3>
 
 ![](images/Status_Plot.png)
+
+<h2 id="Genomic Data">Genomic Data</h2>
 
 <h3 id="Genes Table">Genes Table</h3>
 
