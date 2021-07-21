@@ -47,3 +47,7 @@
 <h3 id="Gene Overview">Gene Overview</h3>
 
 ![](images/Gene_Overview.png)
+
+<h2 id="VCF Metrics">VCF Metrics</h2>
+
+![](images/vcf_metrics.png)
