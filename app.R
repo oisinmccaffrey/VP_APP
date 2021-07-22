@@ -1,3 +1,82 @@
+# Variant Prioritisation
+# Tool to visualise and prioritize clinical variants
+
+
+if (!requireNamespace("shiny", quietly = TRUE))
+  BiocManager::install("shiny")
+
+if (!requireNamespace("plotly", quietly = TRUE))
+  BiocManager::install("plotly")
+
+if (!requireNamespace("grid", quietly = TRUE))
+  BiocManager::install("grid")
+
+if (!requireNamespace("rmarkdown", quietly = TRUE))
+  BiocManager::install("rmarkdown")
+
+if (!requireNamespace("magrittr", quietly = TRUE))
+  BiocManager::install("magrittr")
+
+if (!requireNamespace("vroom", quietly = TRUE))
+  BiocManager::install("vroom")
+
+if (!requireNamespace("Cairo", quietly = TRUE))
+  BiocManager::install("Cairo")
+
+if (!requireNamespace("grDevices", quietly = TRUE))
+  BiocManager::install("grDevices")
+
+if (!requireNamespace("ggplot2", quietly = TRUE))
+  BiocManager::install("ggplot2")
+
+if (!requireNamespace("vcfR", quietly = TRUE))
+  BiocManager::install("vcfR")
+
+if (!requireNamespace("dplyr", quietly = TRUE))
+  BiocManager::install("dplyr")
+
+if (!requireNamespace("tidyr", quietly = TRUE))
+  BiocManager::install("tidyr")
+
+if (!requireNamespace("htmlwidgets", quietly = TRUE))
+  BiocManager::install("htmlwidgets")
+
+if (!requireNamespace("shinycssloaders", quietly = TRUE))
+  BiocManager::install("shinycssloaders")
+
+if (!requireNamespace("stringr", quietly = TRUE))
+  BiocManager::install("stringr")
+
+if (!requireNamespace("VariantAnnotation", quietly = TRUE))
+  BiocManager::install("VariantAnnotation")
+
+if (!requireNamespace("tibble", quietly = TRUE))
+  BiocManager::install("tibble")
+
+if (!requireNamespace("shinyWidgets", quietly = TRUE))
+  BiocManager::install("shinyWidgets")
+
+if (!requireNamespace("shinydashboard", quietly = TRUE))
+  BiocManager::install("shinydashboard")
+
+if (!requireNamespace("shinydashboardPlus", quietly = TRUE))
+  BiocManager::install("shinydashboardPlus")
+
+if (!requireNamespace("DT", quietly = TRUE))
+  BiocManager::install("DT")
+
+if (!requireNamespace("plotly", quietly = TRUE))
+  BiocManager::install("plotly")
+
+if (!requireNamespace("shinyalert", quietly = TRUE))
+  BiocManager::install("shinyalert")
+
+if (!requireNamespace("shinyjs", quietly = TRUE))
+  BiocManager::install("shinyjs")
+
+
+
+
 library(shiny)
 library(plotly) # interactive ggplots.. 
 library(grid)
@@ -22,10 +101,6 @@ library(DT) # to generate interactive datatables
 library(plotly) # to generate interactive plots
 library(shinyalert) # for error alert
 library(shinyjs) # for error message
-library(shinyscreenshot) # Capture screenshots in 'Shiny' applications - downloaded as a PNG image
-library(webshot)
-library(rvest) # Scraping data from websites
-library(lubridate) # fast and user friendly parsing of date-time data,
 
 #Importing the data, readVcf from VariantAnnotation package
 
