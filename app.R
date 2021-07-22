@@ -29,7 +29,7 @@ library(lubridate) # fast and user friendly parsing of date-time data,
 
 #Importing the data, readVcf from VariantAnnotation package
 
-vcf <- readVcf("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/data/SRR.gavin_secondpass.vcf", "GRCh38")
+vcf <- readVcf("data/SRR.gavin_secondpass.vcf", "GRCh38")
 vcf_1 <- as.data.frame(VariantAnnotation::fixed(vcf))
 vcf_2 <- as.data.frame(VariantAnnotation::info(vcf))
 vcf_3 <- as.data.frame(rowRanges(vcf))
@@ -189,7 +189,7 @@ vcf_master_OMIM_AND_PHENO <- merge(vcf_master_OMIM_CODES,
 # FGFR2  Audiologic_Otolaryngologic
 # DSP	   Cardiovascular
 
-panels <- read.delim("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/data/PANELS.vcf")
+panels <- read.delim("data/PANELS.vcf")
 unique(panels) -> panels
 PHENOTYPES_WithMaster <- merge(vcf_master_OMIM_AND_PHENO, 
                                panels[, c("HGNC", "Panel")], 
