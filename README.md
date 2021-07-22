@@ -41,13 +41,15 @@ git clone https://github.com/oisinmccaffrey/VP_APP
 
 Now run the App.R file (Running_VP/App.R) within RStudio. 
 
+<h2 id="Home Page">Home Page</h2>
 
+![](images/Home_page.png)
 
 <h2 id="Pathogenicity">Pathogenicity</h2>
 
 <h3 id="CADD Score vs. Minor Allele Frequency">CADD Score vs. Minor Allele Frequency</h3>
 
-![](images/APP_screenshot.png)
+![](images/CADD_plot.png)
 
 <h3 id="Variant Status">Variant Status</h3>
 
@@ -70,3 +72,4 @@ Now run the App.R file (Running_VP/App.R) within RStudio.
 <h2 id="VCF Metrics">VCF Metrics</h2>
 
 ![](images/vcf_metrics.png)
+
