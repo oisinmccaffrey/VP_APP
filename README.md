@@ -24,6 +24,25 @@
 
 ![](images/Workflow.png)
 
+
+<h2 id="Run Variant Prioritisation">Run Variant Prioritisation</h2>
+
+```
+mkdir Running_VP
+```
+
+```
+cd Running_VP
+```
+
+```
+git clone https://github.com/oisinmccaffrey/VP_APP
+```
+
+Now you can run the App.R file from RStudio. 
+
+
+
 <h2 id="Pathogenicity">Pathogenicity</h2>
 
 <h3 id="CADD Score vs. Minor Allele Frequency">CADD Score vs. Minor Allele Frequency</h3>
