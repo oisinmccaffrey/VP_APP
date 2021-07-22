@@ -1,0 +1,54 @@
+Creating the PANELS.vcf from GAVIN’s cgdpanels (https://github.com/molgenis/gavin/tree/master/data/goldstandards/cgdpanels) 
+
+
+
+Part 1:
+
+grep -v '#' Renal.vcf | awk -v OFS="\t" '{print $1, $2, $3, $4, $5, $6, $7, "Renal"}' > 2_Renal.vcf
+
+Part 2:
+
+grep -v '#' 2_Renal.vcf | awk -v OFS="\t" '{print $3, "Renal"}' | sed 's/:.*//' > 3_Renal.vcf
+
+Part 3:
+
+
+sed '/^rs/ d' < 3_Renal.vcf > 4_Renal.vcf
+
+
+Part 4:
+
+Removing the “.” 
+
+awk '$1 != "."' 4_Renal.vcf > 5_Renal.vcf
+
+
+Part 5:
+
+Removing the “ ” 
+
+awk '$1 != " "' 5_Renal.vcf > 6_Renal.vcf
+
+
+Part 6:
+
+Adding in the PANEL 
+
+awk '{print $0 "\t Renal"}' 6_Renal.vcf > 7_Renal.vcf
+
+Part 7:
+
+Create headers:
+
+
+echo -e "HGNC\tPanel" | cat - 7_Renal.vcf > 8_Renal.vcf
+
+—————————————————————————————————————————————————————
+
+This was performed for the ~20 VCFs in the cpdpanels GitHub.. 
+
+Then all were appended together to create PANELS.vcf
+
+Append
+
+cat file1 file2 file3 > newfile

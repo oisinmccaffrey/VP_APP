@@ -29,7 +29,7 @@ library(lubridate) # fast and user friendly parsing of date-time data,
 
 #Importing the data, readVcf from VariantAnnotation package
 
-vcf <- readVcf("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/SRR.gavin_secondpass.vcf", "GRCh38")
+vcf <- readVcf("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/data/SRR.gavin_secondpass.vcf", "GRCh38")
 vcf_1 <- as.data.frame(VariantAnnotation::fixed(vcf))
 vcf_2 <- as.data.frame(VariantAnnotation::info(vcf))
 vcf_3 <- as.data.frame(rowRanges(vcf))
@@ -156,7 +156,7 @@ vcf_master$EXAC_AF <- log(vcf_master$EXAC_AF)
 
 # LINK TO OMIM
 
-omim2gene <- vroom("mim2gene.txt")
+omim2gene <- vroom("data/mim2gene.txt")
 omim2gene <- dplyr::rename(omim2gene,  HGNC = `Approved Gene Symbol (HGNC)`)
 omim2gene <- omim2gene %>% drop_na(HGNC)
 vcf_master_Berg <- vcf_master
@@ -169,7 +169,7 @@ vcf_master_OMIM_CODES <- dplyr::rename(vcf_master_OMIM_CODES, OMIM = `MIM Number
 
 #Linking to Gene Panels
 
-genemap2 <- vroom("genemap2.txt")
+genemap2 <- vroom("data/genemap2.txt")
 genemap2 <- dplyr::rename(genemap2, OMIM = `MIM Number`)
 genemap2 <- genemap2 %>% drop_na(OMIM)
 genemap2 <- genemap2 %>% drop_na(Phenotypes)
@@ -189,7 +189,7 @@ vcf_master_OMIM_AND_PHENO <- merge(vcf_master_OMIM_CODES,
 # FGFR2  Audiologic_Otolaryngologic
 # DSP	   Cardiovascular
 
-panels <- read.delim("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/PANELS/PANELS.vcf")
+panels <- read.delim("/Users/oisinmccaffrey/Desktop/R_Shiny_Summer/data/PANELS.vcf")
 unique(panels) -> panels
 PHENOTYPES_WithMaster <- merge(vcf_master_OMIM_AND_PHENO, 
                                panels[, c("HGNC", "Panel")], 
