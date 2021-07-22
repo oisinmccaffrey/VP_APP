@@ -39,7 +39,7 @@ cd Running_VP
 git clone https://github.com/oisinmccaffrey/VP_APP
 ```
 
-Now you can run the App.R file from RStudio. 
+Now run the App.R file (Running_VP/App.R) within RStudio. 
 
 
 
