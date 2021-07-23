@@ -4,6 +4,9 @@
 
 #If required, installing relevant packages..
 
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
 if (!requireNamespace("shiny", quietly = TRUE))
   BiocManager::install("shiny")
 
@@ -78,6 +81,8 @@ if (!requireNamespace("shinyjs", quietly = TRUE))
 
 #If required, loading relevant packages..
 
+library(BiocManager)
+options(repos = BiocManager::repositories())
 library(shiny)
 library(plotly) # interactive ggplots.. 
 library(grid)
