@@ -2,11 +2,13 @@
 # Tool to visualise and prioritize clinical variants
 
 
+#If required, installing relevant packages..
+
 if (!requireNamespace("shiny", quietly = TRUE))
   BiocManager::install("shiny")
 
 if (!requireNamespace("plotly", quietly = TRUE))
-  BiocManager::install("plotly")
+  BiocManager::incstall("plotly")
 
 if (!requireNamespace("grid", quietly = TRUE))
   BiocManager::install("grid")
@@ -74,8 +76,7 @@ if (!requireNamespace("shinyalert", quietly = TRUE))
 if (!requireNamespace("shinyjs", quietly = TRUE))
   BiocManager::install("shinyjs")
 
-
-
+#If required, loading relevant packages..
 
 library(shiny)
 library(plotly) # interactive ggplots.. 
@@ -85,10 +86,10 @@ library(magrittr)
 library(vroom)
 library(Cairo)
 library(grDevices)
-library(ggplot2)
+library(ggplot2) # Used to create Pathogenicity plots
 library(vcfR) # For manipulating VCF data
 library(dplyr) # Manipulating datasets
-library(tidyr)
+library(tidyr) # Data manipulation throughout
 library(htmlwidgets) # to use saveWidget function
 library(shinycssloaders) # for loading spinner while app is loading
 library(stringr) # Used for removing pipe separators from VCF files "|" 
@@ -211,8 +212,14 @@ vcf_master <- dplyr::rename(vcf_master, Chr = seqnames)
  #We are taking the numerical value after 'Score of' i.e. CADD score of.
 
 vcf_master$CADD_Extract <- str_extract(vcf_master$CADD_Relevance, '(?i) (?<=score of\\D)\\d+')
-vcf_master <- transform(vcf_master, CADD_Extract = as.numeric(CADD_Extract))
-vcf_master$CADD_FINAL <- ifelse(is.na(vcf_master$CADD_Extract), vcf_master$CADD_SCALED, vcf_master$CADD_Extract)
+
+vcf_master <- transform(vcf_master, 
+                        CADD_Extract = as.numeric(CADD_Extract))
+
+vcf_master$CADD_FINAL <- ifelse(is.na(vcf_master$CADD_Extract), 
+                                vcf_master$CADD_SCALED, 
+                                vcf_master$CADD_Extract)
+
 vcf_master <- transform(vcf_master, CADD_FINAL = as.numeric(CADD_FINAL))
 
 # transform CADD_SCALED column to be numeric data
@@ -338,7 +345,6 @@ vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
 
 vcf_master$Status <- gsub("SRR:", " ", vcf_master$Status)
 vcf_master$Status <- gsub("_", " ", vcf_master$Status)
-
 
 
 
