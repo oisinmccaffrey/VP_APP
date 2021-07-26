@@ -1,11 +1,19 @@
-# Variant Prioritisation
+### Variant Prioritisation
+
 # Tool to visualise and prioritize clinical variants
 
+# The  application  provides a tiered system ranking variants 
+# in terms of their pathogenicity  and  role  in  known  diseases,  
+# as  well  as providing  additional  functionality  such  as  
+# summary reports of metrics used in variant classification (e.g. quality,  depth  and  allele  frequency).  
+# The  application provides a clinician with 
+# the ability to filter by gene panels, 
+# and query affected genes via the OMIM API, returning 
+# gene-phenotype  information  supported  by literature.  
 
-#If required, installing relevant packages..
 
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
+
+### If required, installing relevant packages..
 
 if (!requireNamespace("shiny", quietly = TRUE))
   BiocManager::install("shiny")
@@ -79,10 +87,8 @@ if (!requireNamespace("shinyalert", quietly = TRUE))
 if (!requireNamespace("shinyjs", quietly = TRUE))
   BiocManager::install("shinyjs")
 
-#If required, loading relevant packages..
+### If required, loading relevant packages..
 
-library(BiocManager)
-options(repos = BiocManager::repositories())
 library(shiny)
 library(plotly) # interactive ggplots.. 
 library(grid)
@@ -207,14 +213,14 @@ is.na(vcf_master$ID_) <-
 #Rename seqnames
 vcf_master <- dplyr::rename(vcf_master, Chr = seqnames)
 
-##N.B. 
+### N.B. 
 
 # With some of the variants in the file, the CADD score is not under the relevant
-#'CADD SCALED Score' column.. therefore it requires extracting from the 'CADD_Relevance'
+# 'CADD SCALED Score' column.. therefore it requires extracting from the 'CADD_Relevance'
 # Column which provides information on the variant.
 
 # This extraction is performed using the package (stringr) and the function str_extract
- #We are taking the numerical value after 'Score of' i.e. CADD score of.
+# We are taking the numerical value after 'Score of' i.e. CADD score of.
 
 vcf_master$CADD_Extract <- str_extract(vcf_master$CADD_Relevance, '(?i) (?<=score of\\D)\\d+')
 
@@ -241,7 +247,7 @@ vcf_master$ID_ <- reorder(vcf_master$ID_, vcf_master$CADD_FINAL)
 vcf_master$EXAC_AF <- log(vcf_master$EXAC_AF)
 
 
-# LINK TO OMIM
+### LINK TO OMIM
 
 omim2gene <- vroom("data/mim2gene.txt")
 omim2gene <- dplyr::rename(omim2gene,  HGNC = `Approved Gene Symbol (HGNC)`)
@@ -254,7 +260,7 @@ vcf_master_OMIM_CODES <- merge(vcf_master_Berg,
                                all.x=TRUE)
 vcf_master_OMIM_CODES <- dplyr::rename(vcf_master_OMIM_CODES, OMIM = `MIM Number`)
 
-#Linking to Gene Panels
+### Linking to Gene Panels
 
 genemap2 <- vroom("data/genemap2.txt")
 genemap2 <- dplyr::rename(genemap2, OMIM = `MIM Number`)
@@ -351,7 +357,7 @@ vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
 vcf_master$Status <- gsub("SRR:", " ", vcf_master$Status)
 vcf_master$Status <- gsub("_", " ", vcf_master$Status)
 
-
+### VCF Metrics
 
 #Quality score dataframe
 
@@ -401,11 +407,15 @@ render_OMIM_link <- c(
     "  }",
     "}"
 )
+  
+  
+### End of pre-processing
 
 
-
-
-
+  
+  
+  
+  
 ### Beginning of Shiny App
 
 # Define UI for application
@@ -474,7 +484,6 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                    dashboardBody(
                      
     
-                     
                      #css the .content-wrapper to change background colour
                      #This Makes the pain page white as oppose to standard grey
                      
@@ -560,8 +569,8 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                
                        ),
                        
-                       #Use Javascript to detect the browser window size 
-                       #(initial size and any resize if you make window bigger)
+                       # Use Javascript to detect the browser window size 
+                       # (initial size and any resize if you make window bigger)
                        
                        tabItem("CADD",
                                
@@ -1266,10 +1275,10 @@ server <- function(input, output, session) {
     
     output$panel_table <- DT::renderDataTable({
       
-      #Call the genes dataframe for the Gene Table..
-      #Also calling the 'render_OMIM_link' so that 
-      #We can perform hyperlink to OMIM webpage.. 
-      #Using the OMIM ID's for each variant
+      #Call the Genes Panel dataframe for the Gene Panel Table..
+      #Also calling the 'render_GeneCards_link' so that 
+      #We can perform hyperlink to GeneCards webpage.. 
+      #Using the HGNC gene symbols for each variant
       #Using javascript
       
       datatable(Genes_Panel, rownames = FALSE, 
