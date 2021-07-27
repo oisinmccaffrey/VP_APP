@@ -1,15 +1,15 @@
 ### Variant Prioritisation
 
 # Tool to visualise and prioritize clinical variants
-
-# The  application  provides a tiered system ranking variants 
-# in terms of their pathogenicity  and  role  in  known  diseases,  
-# as  well  as providing  additional  functionality  such  as  
-# summary reports of metrics used in variant classification (e.g. quality,  depth  and  allele  frequency).  
-# The  application provides a clinician with 
-# the ability to filter by gene panels, 
-# and query affected genes via the OMIM API, returning 
-# gene-phenotype  information  supported  by literature.  
+# 
+# The  application  provides a tiered system ranking variants
+# in terms of their pathogenicity  and  role  in  known  diseases,
+# as  well  as providing  additional  functionality  such  as
+# summary reports of metrics used in variant classification (e.g. quality,  depth  and  allele  frequency).
+# The  application provides a clinician with
+# the ability to filter by gene panels,
+# and query affected genes via the OMIM API, returning
+# gene-phenotype  information  supported  by literature.
 
 
 
@@ -558,7 +558,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                    tags$a(href = "https://www.internationalgenome.org/data-portal/sample", 
                                           "IGSR Data"),
                                    tags$br(),tags$br(),
-                                   tags$img(src = "images/Workflow.png", width = "1000px", height = "150px"),
+                                   tags$img(src = "images/Project_Workflow.png", width = "800px", height = "150px"),
                                    br(),
                                    tags$img(src = "images/nuig_logo.png", width = "150px", height = "75px")
                                ),
@@ -1301,10 +1301,10 @@ server <- function(input, output, session) {
         # can happen when deployed).
         tempReport <- file.path(tempdir(), "report.Rmd")
         file.copy("report.Rmd", tempReport, overwrite = TRUE)
-        
+
         # Set up parameters to pass to Rmd document
         params <- list(qual_hist_plot = input$qual_hist_plot)
-        
+
         # Knit the document, passing in the `params` list, and eval it in a
         # child of the global environment (this isolates the code in the document
         # from the code in this app).
