@@ -811,28 +811,47 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                    status = "danger",
                                    tags$p(
                                      class = "text-center",
-                                     tags$img(class = "img-responsive img-rounded center-block", src = "images/oisin.jpg", style = "max-width: 250px;")
+                                     tags$img(class = "img-responsive img-rounded center-block", 
+                                              src = "images/oisin.jpg", 
+                                              style = "max-width: 250px;")
                                    ),
                                    tags$p(
                                      class = "text-center",
                                      tags$strong("Hi! I'm Oisin."),
-                                     HTML(paste0("(", tags$a(href = "https://twitter.com/oisinmccaff", "@oisinmccaff"), ")"))
+                                     HTML(paste0("(", 
+                                                 tags$a(href = "https://twitter.com/oisinmccaff", 
+                                                        "@oisinmccaff"), ")"))
                                    ),
                                    tags$p(
                                      "I'm a data scientist from Co. Sligo, Ireland.",
                                      br(),
                                      "You can find more of the things I like to build on my github",
-                                     HTML(paste0(tags$a(href = "https://github.com/oisinmccaffrey", "oisinmccaffrey", target = "_blank"), "."))
+                                     HTML(paste0(
+                                       tags$a(href = "https://github.com/oisinmccaffrey", 
+                                              "oisinmccaffrey", target = "_blank"), "."))
                                    ),
                                    tags$p(
                                      "Get in touch with me on Twitter at",
-                                     HTML(paste0("(", tags$a(href = "https://twitter.com/oisinmccaff", "@oisinmccaff", target = "_blank"), "),")),
+                                     HTML(paste0(
+                                       "(", tags$a(href = "https://twitter.com/oisinmccaff", 
+                                                   "@oisinmccaff", target = "_blank"), "),")),
+                                     
+                                     "LinkedIn at",
+                                     HTML(paste0(
+                                       "(", tags$a(href = "https://www.linkedin.com/in/oisin-mccaffrey/", 
+                                                   "@oisin-mccaffrey", target = "_blank"), "),")),
+                                     
+                                     
                                      "or by email at",
-                                     HTML(paste0(tags$a(href = "oisinmccaff@gmail.com", "oisinmccaff@gmail.com"), "."))
+                                     HTML(paste0(
+                                       tags$a(href = "oisinmccaff@gmail.com", 
+                                              "oisinmccaff@gmail.com"), "."))
                                    )
                                  ),
+                                 
                                  # About - About Me - end --------------------------------------------------
                                  # About - About Dashboard - start -----------------------------------------
+                                 
                                  box(
                                    title = "About this Dashboard",
                                    status = "info",
@@ -851,14 +870,17 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                    ),
                                    tags$p(
                                      "This dashboard was built in",
-                                     tags$a(href = "https://r-project.org", target = "_blank", "R"),
+                                     tags$a(href = "https://r-project.org", 
+                                            target = "_blank", "R"),
                                      "and", tags$a(href = "https://rstudio.com", target = "_blank", "RStudio"), "with",
+                                     
                                      tags$strong("shiny,"),
                                      tags$strong("shinydashboard,"),
                                      tags$strong("VariantAnnotation,"),
                                      tags$strong("plotly,"),
                                      "the", tags$strong("tidyverse,"),
                                      "and many more packages."
+                                     
                                    )
                                  )
                                  # About - About Dashboard - start -----------------------------------------
