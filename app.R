@@ -804,31 +804,66 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                        
                        tabItem("About",
                                
-                               div(id = "page-topright",
-                                   div(class = "source_link", 
-                                       style="float:right", 
-                                       a(href = "https://github.com/oisinmccaffrey/VP_APP", 
-                                         "View source code on github", 
-                                         icon("github"))),
-                                   
-                               ),
-                               br(),
-                               br(),
-                               br(),
-                               includeHTML("about.html"),
-                               shinyjs::useShinyjs(),
-                               tags$head(
-                                 tags$link(rel = "stylesheet", 
-                                           type = "text/css", 
-                                           href = "plugins/carousel.css"),
-                                 tags$script(src = "plugins/holder.js")
-                               ),
-                               
-                               
-                               tags$style(type="text/css",
-                                          ".shiny-output-error { visibility: hidden; }",
-                                          ".shiny-output-error:before { visibility: hidden; }"
-                               )),
+                               fluidRow(
+                                 # About - About Me - start ------------------------------------------------
+                                 box(
+                                   title = "About me",
+                                   status = "danger",
+                                   tags$p(
+                                     class = "text-center",
+                                     tags$img(class = "img-responsive img-rounded center-block", src = "images/oisin.jpg", style = "max-width: 250px;")
+                                   ),
+                                   tags$p(
+                                     class = "text-center",
+                                     tags$strong("Hi! I'm Oisin."),
+                                     HTML(paste0("(", tags$a(href = "https://twitter.com/oisinmccaff", "@oisinmccaff"), ")"))
+                                   ),
+                                   tags$p(
+                                     "I'm a data scientist from Co. Sligo, Ireland.",
+                                     br(),
+                                     "You can find more of the things I like to build on my github",
+                                     HTML(paste0(tags$a(href = "https://github.com/oisinmccaffrey", "oisinmccaffrey", target = "_blank"), "."))
+                                   ),
+                                   tags$p(
+                                     "Get in touch with me on Twitter at",
+                                     HTML(paste0("(", tags$a(href = "https://twitter.com/oisinmccaff", "@oisinmccaff", target = "_blank"), "),")),
+                                     "or by email at",
+                                     HTML(paste0(tags$a(href = "oisinmccaff@gmail.com", "oisinmccaff@gmail.com"), "."))
+                                   )
+                                 ),
+                                 # About - About Me - end --------------------------------------------------
+                                 # About - About Dashboard - start -----------------------------------------
+                                 box(
+                                   title = "About this Dashboard",
+                                   status = "info",
+                                   tags$p(
+                                     class = "text-center",
+                                     
+                                     tags$a(
+                                       href = "https://www.r-project.org",
+                                       target = "_blank",
+                                       tags$img(class = "image-responsive",
+                                                src = "https://www.r-project.org/logo/Rlogo.svg",
+                                                style = "max-width: 150px;"
+                                       )
+                                     ),
+
+                                   ),
+                                   tags$p(
+                                     "This dashboard was built in",
+                                     tags$a(href = "https://r-project.org", target = "_blank", "R"),
+                                     "and", tags$a(href = "https://rstudio.com", target = "_blank", "RStudio"), "with",
+                                     tags$strong("shiny,"),
+                                     tags$strong("shinydashboard,"),
+                                     tags$strong("VariantAnnotation,"),
+                                     tags$strong("plotly,"),
+                                     "the", tags$strong("tidyverse,"),
+                                     "and many more packages."
+                                   )
+                                 )
+                                 # About - About Dashboard - start -----------------------------------------
+                               )
+                       ),
                        
                        
                        tabItem("Quality",
