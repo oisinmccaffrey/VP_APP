@@ -93,7 +93,7 @@ if (!requireNamespace("shinyalert", quietly = TRUE))
 if (!requireNamespace("shinyjs", quietly = TRUE))
   BiocManager::install("shinyjs")
 
-### If required, loading relevant packages..
+### Loading relevant packages..
 
 library(shiny)
 library(plotly) # interactive ggplots.. 
@@ -129,49 +129,65 @@ vcf_3 <- as.data.frame(rowRanges(vcf))
 
 
 # duplicate info here
+
 vcf_master <- cbind(vcf_3, vcf_1, vcf_2)
-# stage an empty DF which we will populate in the 'for' loop.
-# If extracting another col, be sure to add it here
+
+# Staging an empty DF which will be populated in the 'for' loop.
+# If extracting another col, can add it here
+
 collect_ann <- data.frame(Allele=as.character(),
                           Consequence=as.character(),
                           IMPACT=as.character(),
                           Symbol=as.character(),
                           Gene=as.character())
 
-# loop over every row in df
+# looping over every row in DF
+
 for(i in 1:nrow(vcf_master)){
-  # grab the ann column
+  
+  # grab the ANN column
+  
   ann <- vcf_master$ANN[i]
-  # parse ann column
+  
+  # parse ANN column
   ann <- str_split(ann, "\\|")
+  
   # convert to DF 
   ann <- as.data.frame(t(unlist(ann)))
+  
   # we want the first 5 cols in this case
   ann <- ann[,1:5]
-  # rename to match the collect_ann df
+  
+  # rename to match the collect_ann DF
   colnames(ann) <- c("Allele", 
                      "Consequence", 
                      "IMPACT", 
                      "Symbol", 
                      "Gene")
   
-  # populate the collect ann df
+  # populate the collect ann DF
   collect_ann <- rbind(collect_ann, ann)
 }
 
-# append to master df
+
+# append to master DF
 vcf_master <- cbind(vcf_master, collect_ann)
+
 # Then collect
 collect_rlv <- data.frame(Status=as.character(),
                           SRR=as.character(),
                           Prediction=as.character(),
                           CADD_Relevance=as.character())
 
+#Performing same procedure to split the RLV column!
+
 for(i in 1:nrow(vcf_master)){
+  
   rlv <- vcf_master$RLV[i]
   rlv <- str_split(rlv, "\\|")
   rlv <- as.data.frame(t(unlist(rlv)))
   rlv <- rlv[,c(11,13,15,17)]
+  
   colnames(rlv) <- c("Status", 
                      "SRR", 
                      "Prediction", 
@@ -179,6 +195,7 @@ for(i in 1:nrow(vcf_master)){
   
   collect_rlv <- rbind(collect_rlv, rlv)
 }
+
 vcf_master <- cbind(vcf_master, collect_rlv)
 
 #Substitute for '|' and 'c' with a blank '' instead
@@ -313,8 +330,9 @@ Genes_Panel <- Genes_Panel[order(Genes_Panel$Chr),]
 
 Genes_Panel$Consequence <- gsub("_", " ", Genes_Panel$Consequence)
 
-#Substitute "&" for " and "
 
+
+#Substitute "&" for " and "
 Genes_Panel$Consequence <- gsub("&", " and ", Genes_Panel$Consequence)
 
 Genes_Panel$Panel <- gsub("_", " ", Genes_Panel$Panel)
@@ -363,7 +381,9 @@ vcf_master$Consequence <- gsub("&", " and ", vcf_master$Consequence)
 vcf_master$Status <- gsub("SRR:", " ", vcf_master$Status)
 vcf_master$Status <- gsub("_", " ", vcf_master$Status)
 
-### VCF Metrics
+#-----------------------------------------------------
+
+###### VCF Metrics
 
 #Quality score dataframe
 
@@ -383,6 +403,11 @@ df_MQ<- as.data.frame(vcf_master$MQ)
 df_MQ <- rename(df_MQ, MQ = `vcf_master$MQ`)
 df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
 
+
+
+#-------------------------------------------------------
+
+### Linking Gene IDs to OMIM
 
 # This javascript command is saying:
 # For the data shown in in the table (gene table), 
