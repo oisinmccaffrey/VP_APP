@@ -819,8 +819,23 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                    status = "success",
                                    solidHeader = TRUE,
                                    tags$p(
-                                      fluidRow(valueBoxOutput("total_variants", width = 10),
-                                      fluidRow(valueBoxOutput("most_common_variant", width = 10))))),
+                                     
+                                     class = "text-center",
+                                     tags$img(class = "img-responsive img-rounded center-block", 
+                                              src = "images/vcf_icon.png", 
+                                              style = "max-width: 150px;"),
+                                     
+                                     boxProfileItem("Total number of Variants:", 
+                                                    span(textOutput("total_variants"), 
+                                                         style='color:black')),
+                                     
+                                     boxProfileItem("Most common variant:", 
+                                                    span(textOutput("most_common_variant"), 
+                                                         style='color:black')),
+                                     
+                                     boxProfileItem("Mean CADD score for this VCF:", 
+                                                    span(textOutput("mean_CADD_score"), 
+                                                         style='color:black')))),
                                  
                                  # About - About VCF - end ------------------------------------------------
                                  
@@ -1097,18 +1112,27 @@ server <- function(input, output, session) {
     
   })
   
-  output$total_variants <- renderValueBox({
+  output$most_common_variant <- renderText({
+    
     # display total number of patients in a value box
-    valueBox(tail(names(sort(table(vcf_master$Consequence))), 1), h5("Most Common Variant"),
-             color = "green"
-    )
+    
+    tail(names(sort(table(vcf_master$Consequence))), 1)
   })
   
-  output$most_common_variant <- renderValueBox({
+  output$total_variants <- renderText({
+    
     # display total number of patients in a value box
-    valueBox(print(length(vcf_master$ID_)), h5("Total Number of Variants"),
-             color = "green"
-    )
+    
+    print(length(vcf_master$ID_))
+
+  })
+  
+  output$mean_CADD_score <- renderText({
+    
+    # display total number of patients in a value box
+    
+    round(mean(vcf_master$CADD_FINAL, na.rm = TRUE))
+    
   })
   
   
