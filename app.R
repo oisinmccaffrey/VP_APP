@@ -530,6 +530,7 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                br(),
                                br(),
                                
+                               
                                div(id = "app_info", class = "collapsible", 
                                    
                                    tags$h2(strong("Welcome to Variant Prioritisation")),
@@ -811,10 +812,24 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                        tabItem("About",
                                
                                fluidRow(
+                                 # About - About VCF - start ------------------------------------------------
+                                 
+                                 box(
+                                   title = "About this VCF",
+                                   status = "success",
+                                   solidHeader = TRUE,
+                                   tags$p(
+                                      fluidRow(valueBoxOutput("total_variants", width = 10),
+                                      fluidRow(valueBoxOutput("most_common_variant", width = 10))))),
+                                 
+                                 # About - About VCF - end ------------------------------------------------
+                                 
                                  # About - About Me - start ------------------------------------------------
+                                     
                                  box(
                                    title = "About me",
                                    status = "danger",
+                                   solidHeader = TRUE,
                                    tags$p(
                                      class = "text-center",
                                      tags$img(class = "img-responsive img-rounded center-block", 
@@ -855,12 +870,13 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                    )
                                  ),
                                  
-                                 # About - About Me - end --------------------------------------------------
+                                 # About - About VCF - end --------------------------------------------------
                                  # About - About Dashboard - start -----------------------------------------
                                  
                                  box(
                                    title = "About this Dashboard",
                                    status = "info",
+                                   solidHeader = TRUE,
                                    tags$p(
                                      class = "text-center",
                                      
@@ -893,7 +909,10 @@ ui = dashboardPage(controlbar = NULL, footer = NULL,
                                )
                        ),
                        
-                       
+                       # About - About Dashboard - end -----------------------------------------
+                       # About - About VCF - start -----------------------------------------
+
+
                        tabItem("Quality",
                                
                                tags$head(
@@ -1076,6 +1095,20 @@ server <- function(input, output, session) {
     # filter clinical data based on gene symbol entered in searchbar
     vcf_master %>% filter(Symbol == input$searchvcf) 
     
+  })
+  
+  output$total_variants <- renderValueBox({
+    # display total number of patients in a value box
+    valueBox(tail(names(sort(table(vcf_master$Consequence))), 1), h5("Most Common Variant"),
+             color = "green"
+    )
+  })
+  
+  output$most_common_variant <- renderValueBox({
+    # display total number of patients in a value box
+    valueBox(print(length(vcf_master$ID_)), h5("Total Number of Variants"),
+             color = "green"
+    )
   })
   
   
