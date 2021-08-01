@@ -49,8 +49,10 @@ Now run the App.R file (Running_VP/App.R) within RStudio.
 
 Variant Prioritisation user interface. Display shows the CADD vs. Minor Allele Frequency plot.
 The plot embeds thefollowing interactive functions: 
-1. Download plot as png. 2. Zoom/Pan/Lasso/Select.
-3. Compare data on hover. 4. Filter by variantconsequence e.g. missense/stop-gain etc.
+1. Download plot as png. 
+2. Zoom/Pan/Lasso/Select.
+3. Compare data on hover. 
+4. Filter by variantconsequence e.g. missense/stop-gain etc.
 
 <h3 id="CADD Score vs. Minor Allele Frequency">CADD Score vs. Minor Allele Frequency</h3>
 
