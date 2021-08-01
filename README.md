@@ -60,6 +60,8 @@ The plot embeds thefollowing interactive functions:
 
 <h3 id="Variant Status">Variant Status</h3>
 
+The genomic location (chromosome) of each variant in the VCF file plotted against the variant accession ID.
+
 ![](images/Status_Plot.png)
 
 <h2 id="Genomic Data">Genomic Data</h2>
@@ -71,13 +73,19 @@ Minor AlleleFrequency (MAF), and Impact (e.g. moderate, high, low).
 
 <h3 id="Genes Table">Genes Table</h3>
 
+The gene table is curated to display the HGNC gene symbol, OMIM ID (with relevant hyperlink to the OMIM website),Ensemble Gene ID, Chromosome, Start position, SNP (e.g. from G to A), Consequence (e.g. Missense Variant), Minor AlleleFrequency (MAF), and Impact (e.g. moderate, high, low).
+
 ![](images/Genes_Table.png)
 
 <h3 id="Genes Panel">Genes Panel</h3>
 
+The Genes Panel table allows the user to filter the variants in the file by their relevant sub panel in thebody e.g. Endocrine, Musculoskeletal, Pulmonary, Renal etc
+
 ![](images/Genes_Panel.png)
 
 <h3 id="Gene Overview">Gene Overview</h3>
+
+The gene overview provides an in-depth synopsis of how the variant has affected distinct genes which canbe queried using the interactive search bar. Includes annotations from CADD (Score), SnpEff (Consequence) and ExAC (allelefrequency).
 
 ![](images/Gene_Overview.png)
 
