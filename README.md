@@ -66,11 +66,6 @@ The genomic location (chromosome) of each variant in the VCF file plotted agains
 
 <h2 id="Genomic Data">Genomic Data</h2>
 
-The gene table is curated to display the HGNC gene symbol, 
-OMIM ID (with relevant hyperlink to the OMIM website), Ensemble Gene ID, 
-Chromosome, Start position, SNP (e.g. from G to A), Consequence (e.g. Missense Variant), 
-Minor AlleleFrequency (MAF), and Impact (e.g. moderate, high, low).
-
 <h3 id="Genes Table">Genes Table</h3>
 
 The gene table is curated to display the HGNC gene symbol, OMIM ID (with relevant hyperlink to the OMIM website),Ensemble Gene ID, Chromosome, Start position, SNP (e.g. from G to A), Consequence (e.g. Missense Variant), Minor AlleleFrequency (MAF), and Impact (e.g. moderate, high, low).
