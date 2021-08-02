@@ -25,7 +25,7 @@ if (!requireNamespace("shiny", quietly = TRUE))
   BiocManager::install("shiny")
 
 if (!requireNamespace("plotly", quietly = TRUE))
-  BiocManager::incstall("plotly")
+  BiocManager::install("plotly")
 
 if (!requireNamespace("grid", quietly = TRUE))
   BiocManager::install("grid")
