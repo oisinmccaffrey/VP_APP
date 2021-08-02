@@ -387,20 +387,20 @@ vcf_master$Status <- gsub("_", " ", vcf_master$Status)
 
 #Quality score dataframe
 
-df<- as.data.frame(vcf_master$QUAL)
-df <- rename(df, QUAL = `vcf_master$QUAL`)
+df <- as.data.frame(vcf_master$QUAL)
+names(df)[1] <- "QUAL"
 df <- transform(df, QUAL = as.numeric(QUAL))
 df <- df %>% drop_na(QUAL)
 
 #Read depth dataframe
 df_DP<- as.data.frame(vcf_master$DP)
-df_DP <- rename(df_DP, DP = `vcf_master$DP`)
+names(df_DP)[1] <- "DP"
 df_DP <- transform(df_DP, DP = as.numeric(DP))
 
 #Mapping Quality dataframe
 
 df_MQ<- as.data.frame(vcf_master$MQ)
-df_MQ <- rename(df_MQ, MQ = `vcf_master$MQ`)
+names(df_MQ)[1] <- "MQ"
 df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
 
 
