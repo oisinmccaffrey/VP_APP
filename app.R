@@ -39,9 +39,6 @@ if (!requireNamespace("magrittr", quietly = TRUE))
 if (!requireNamespace("vroom", quietly = TRUE))
   BiocManager::install("vroom")
 
-if (!requireNamespace("Cairo", quietly = TRUE))
-  BiocManager::install("Cairo")
-
 if (!requireNamespace("grDevices", quietly = TRUE))
   BiocManager::install("grDevices")
 
@@ -101,7 +98,6 @@ library(grid)
 library(rmarkdown)
 library(magrittr)
 library(vroom)
-library(Cairo)
 library(grDevices)
 library(ggplot2) # Used to create Pathogenicity plots
 library(vcfR) # For manipulating VCF data
