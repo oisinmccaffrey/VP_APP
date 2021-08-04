@@ -427,7 +427,7 @@ df_MQ <- transform(df_MQ, MQ = as.numeric(MQ))
 
 
 
-#-------------------------------------------------------
+#------------------------------------------------------------------------------
 
 
 ### Linking Gene IDs to OMIM
@@ -1170,6 +1170,8 @@ server <- function(input, output, session) {
         
     }) 
     
+    #------------------------------------------------------------------------------
+    
     # Creating reactive functions for the 'Gene Overview' table underneath 
     # the 'Genomic Data' sidebar panel..
     
@@ -1278,6 +1280,8 @@ server <- function(input, output, session) {
         
     })
     
+    #------------------------------------------------------------------------------
+    
     
     # Creating interactive plot for CADD vs MAF for each variant
     # The user can filter the interactive plot by the type of variant 
@@ -1335,6 +1339,8 @@ server <- function(input, output, session) {
             
         })
         
+        #------------------------------------------------------------------------------
+        
         
         # Creating interactive plot for the 'Status' of each variant
         # Informs us on the types of variants on each chromosome in the file, 
@@ -1374,6 +1380,9 @@ server <- function(input, output, session) {
             ggplotly(ID_location_plot, tooltip = c("x", "y", "fill", "CADD", "Consequence"), width = (0.825*as.numeric(input$dimension[1])), 
                      height = (0.90*as.numeric(input$dimension[2])))
         })
+        
+        
+        #------------------------------------------------------------------------------
         
         
         # The following histograms are featured under 'VCF' metrics.
