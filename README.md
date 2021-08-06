@@ -27,7 +27,7 @@
 
 <h2 id="Run Variant Prioritisation">Run Variant Prioritisation</h2>
 
-![Preview](App.gif)
+![Preview](images/App.gif)
 <br>
 
 ```
