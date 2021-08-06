@@ -27,6 +27,9 @@
 
 <h2 id="Run Variant Prioritisation">Run Variant Prioritisation</h2>
 
+![Preview](App.gif)
+<br>
+
 ```
 mkdir Running_VP
 ```
