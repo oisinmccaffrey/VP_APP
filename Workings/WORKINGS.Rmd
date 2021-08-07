@@ -337,8 +337,6 @@ library(cowplot)
 ```{r}
 qual_hist_plot <- ggplot(df, aes(QUAL)) +
         geom_histogram(bins = 30, color = "black", fill = "#00FFFF") +
-        geom_vline(aes(xintercept = mean(QUAL)), 
-                   linetype = "dashed", size = 0.6) +
         scale_x_continuous(limits = c(0, 2000), 
                            expand = c(0, 0),
                            breaks = seq(0, 2000, by = 250),
@@ -360,8 +358,6 @@ dp_hist_plot <- ggplot(data=df_DP, aes(DP)) +
    geom_histogram(bins = 16, color = "black", fill = "#5CD85A") +
         ggtitle("Read Depth (DP)") +
         theme_minimal() +
-        geom_vline(aes(xintercept = mean(DP)), 
-                   linetype = "dashed", size = 0.6) +
         theme(plot.title = element_text(hjust = 0.5, face = "bold")) +
         ylab("Frequency") +
         theme(axis.title.y = element_text(angle = 0, vjust = 0.5)) 
