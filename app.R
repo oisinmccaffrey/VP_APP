@@ -473,7 +473,7 @@ render_GeneCards_link <- c(
 # Define UI for application
 ui = dashboardPage(controlbar = NULL, footer = NULL,
                    skin = "red",
-                   dashboardHeader(title = "Variant Prioritisaion"),
+                   dashboardHeader(title = "Variant Prioritisation"),
                    
                    # Create side-bar menu with all tab options: 
                    dashboardSidebar(
