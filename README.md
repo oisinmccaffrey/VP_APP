@@ -42,7 +42,7 @@ cd Running_VP
 git clone https://github.com/oisinmccaffrey/VP_APP
 ```
 
-Now run the App.R file (Running_VP/App.R) within RStudio. 
+Now run the App.R file (VP_APP/App.R) within RStudio. 
 
 <h2 id="Home Page">Home Page</h2>
 
